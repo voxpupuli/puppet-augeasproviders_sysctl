@@ -6,7 +6,7 @@ require 'rubygems'
 
 require 'simplecov'
 require 'coveralls'
-SimpleCov.formatter = Coveralls::SimpleCov::Formatter
+SimpleCov.formatter = Coveralls::SimpleCov::Formatter unless RUBY_VERSION =~ /^1\.8/
 SimpleCov.start do
   add_group "Puppet Types", "/lib/puppet/type/"
   add_group "Puppet Providers", "/lib/puppet/provider/"
