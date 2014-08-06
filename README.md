@@ -1,6 +1,6 @@
-# sysctl: type/provider for shell files for Puppet
+# sysctl: type/provider for sysctl for Puppet
 
-This module provides a new type/provider for Puppet to read and modify shell
+This module provides a new type/provider for Puppet to read and modify sysctl
 config files using the Augeas configuration library.
 
 The advantage of using Augeas over the default Puppet `parsedfile`
