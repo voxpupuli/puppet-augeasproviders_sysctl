@@ -1,8 +1,0 @@
-name    'herculesteam-augeasproviders_sysctl'
-version '1.0.0'
-source 'git://github.com/hercules-team/augeasproviders_sysctl'
-author 'Dominic Cleal, Raphael Pinson'
-license 'Apache 2.0'
-summary 'Augeas-based sysctl type and provider for Puppet'
-description 'This module provides type/provider for sysctl using the Augeas configuration API library.'
-project_page 'http://augeasproviders.com'
