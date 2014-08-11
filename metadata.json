@@ -11,7 +11,7 @@
   "dependencies": [
     {
       "name": "herculesteam/augeasproviders_core",
-      "version_requirement": ">=2.0"
+      "version_requirement": ">=2.0.0"
     }
   ]
 }
