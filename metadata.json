@@ -9,6 +9,9 @@
   "issues_url": "https://github.com/hercules-team/augeasproviders_sysctl/issues",
   "description": "This module provides type/provider for sysctl using the Augeas configuration API library.",
   "dependencies": [
-  
+    {
+      "name": "herculesteam/augeasproviders_core",
+      "version_requirement": ">=2.0"
+    }
   ]
 }
