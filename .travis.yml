@@ -15,7 +15,8 @@ env:
   - PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0
   # Test the latest ruby-augeas (~>)
   - PUPPET=3.2.0 RUBY_AUGEAS=0.5
-  - PUPPET=3.4 RUBY_AUGEAS=0.5
+    # Use this build to publish on the forge
+  - PUPPET=3.4 RUBY_AUGEAS=0.5 FORGE_PUBLISH=true
   # Test other versions of Augeas
   - PUPPET=2.7.0 RUBY_AUGEAS=0.3.0 AUGEAS=0.10.0
   - PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=0.10.0
@@ -68,3 +69,15 @@ install:
   - "travis_retry ./.travis.sh"
 script:
   - AUGEAS_LENS_LIB=augeas/lenses bundle exec rake
+deploy:
+  provider: puppetforge
+  user: herculesteam
+  password:
+    secure: ""
+  on:
+    tags: true
+    # all_branches is required to use tags
+    all_branches: true
+    # Only publish if our main Ruby target builds
+    rvm: 1.9.3
+    condition: "$FORGE_PUBLISH = true"
