@@ -69,6 +69,8 @@ install:
   - "travis_retry ./.travis.sh"
 script:
   - AUGEAS_LENS_LIB=augeas/lenses bundle exec rake
+  # Do not include the augeas/ directory in the deployed module
+  - rm -rf augeas/
 deploy:
   provider: puppetforge
   user: herculesteam
