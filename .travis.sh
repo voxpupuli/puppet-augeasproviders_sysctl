@@ -11,9 +11,9 @@ if [ -z $AUGEAS ]; then
 else
   if [ -z $LENSES ]; then
     # Use matching version of lenses
-    cd augeas && git checkout release-${AUGEAS}
+    cd augeas && git fetch && git checkout release-${AUGEAS}
   else
-    cd augeas && git checkout $LENSES
+    cd augeas && git fetch && git checkout $LENSES
   fi
 
   PKG_VERSION="=${AUGEAS}*"
@@ -32,7 +32,6 @@ sudo apt-get install augeas-tools${PKG_VERSION} \
 
 # Install gems
 gem install bundler
-bundle install
 bundle update puppet
 
 # Reporting only
