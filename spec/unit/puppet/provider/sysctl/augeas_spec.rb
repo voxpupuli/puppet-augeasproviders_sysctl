@@ -101,11 +101,11 @@ describe provider_class do
         }
       }
 
-      inst.size.should == 7
-      inst[0].should == {:name=>"net.ipv4.ip_forward", :ensure=>:present, :value=>"0", :comment=>:absent}
-      inst[1].should == {:name=>"net.ipv4.conf.default.rp_filter", :ensure=>:present, :value=>"1", :comment=>:absent}
-      inst[2].should == {:name=>"net.ipv4.conf.default.accept_source_route", :ensure=>:present, :value=>"0", :comment=>"Do not accept source routing"}
-      inst[3].should == {:name=>"kernel.sysrq", :ensure=>:present, :value=>"0", :comment=>"controls the System Request debugging functionality of the kernel"}
+      expect(inst.size).to eq(7)
+      expect(inst[0]).to eq({:name=>"net.ipv4.ip_forward", :ensure=>:present, :value=>"0", :comment=>:absent})
+      expect(inst[1]).to eq({:name=>"net.ipv4.conf.default.rp_filter", :ensure=>:present, :value=>"1", :comment=>:absent})
+      expect(inst[2]).to eq({:name=>"net.ipv4.conf.default.accept_source_route", :ensure=>:present, :value=>"0", :comment=>"Do not accept source routing"})
+      expect(inst[3]).to eq({:name=>"kernel.sysrq", :ensure=>:present, :value=>"0", :comment=>"controls the System Request debugging functionality of the kernel"})
     end
 
     it "should create new entry next to commented out entry" do
@@ -152,8 +152,8 @@ describe provider_class do
       ))
 
       aug_open(target, "Sysctl.lns") do |aug|
-        aug.match("kernel.sysrq").should == []
-        aug.match("#comment[. =~ regexp('kernel.sysrq:.*')]").should == []
+        expect(aug.match("kernel.sysrq")).to eq([])
+        expect(aug.match("#comment[. =~ regexp('kernel.sysrq:.*')]")).to eq([])
       end
     end
 
@@ -174,8 +174,8 @@ describe provider_class do
           { "net.ipv4.ip_forward" = "1" }
         ')
 
-        @logs.first.should_not be_nil
-        @logs.first.message.should == "changed configuration value from '0' to '1' and live value from '3' to '1'"
+        expect(@logs.first).not_to be_nil
+        expect(@logs.first.message).to eq("changed configuration value from '0' to '1' and live value from '3' to '1'")
       end
 
       it "should update value with augeas only" do
@@ -194,8 +194,8 @@ describe provider_class do
           { "net.ipv4.ip_forward" = "1" }
         ')
 
-        @logs.first.should_not be_nil
-        @logs.first.message.should == "changed configuration value from '0' to '1'"
+        expect(@logs.first).not_to be_nil
+        expect(@logs.first.message).to eq("changed configuration value from '0' to '1'")
       end
     end
 
@@ -216,8 +216,8 @@ describe provider_class do
           { "net.ipv4.ip_forward" = "1" }
         ')
 
-        @logs.first.should_not be_nil
-        @logs.first.message.should == "changed configuration value from '0' to '1' and live value from '0' to '1'"
+        expect(@logs.first).not_to be_nil
+        expect(@logs.first.message).to eq("changed configuration value from '0' to '1' and live value from '0' to '1'")
       end
 
       it "should update value with augeas only" do
@@ -236,8 +236,8 @@ describe provider_class do
           { "net.ipv4.ip_forward" = "1" }
         ')
 
-        @logs.first.should_not be_nil
-        @logs.first.message.should == "changed configuration value from '0' to '1'"
+        expect(@logs.first).not_to be_nil
+        expect(@logs.first.message).to eq("changed configuration value from '0' to '1'")
       end
     end
 
@@ -259,8 +259,8 @@ describe provider_class do
           { "net.ipv4.ip_forward" = "1" }
         ')
 
-        @logs.first.should_not be_nil
-        @logs.first.message.should == "changed configuration value from '0' to '1'"
+        expect(@logs.first).not_to be_nil
+        expect(@logs.first.message).to eq("changed configuration value from '0' to '1'")
       end
 
       it "should update value with augeas only and never run sysctl" do
@@ -279,8 +279,8 @@ describe provider_class do
           { "net.ipv4.ip_forward" = "1" }
         ')
 
-        @logs.first.should_not be_nil
-        @logs.first.message.should == "changed configuration value from '0' to '1'"
+        expect(@logs.first).not_to be_nil
+        expect(@logs.first.message).to eq("changed configuration value from '0' to '1'")
       end
     end
 
@@ -302,8 +302,8 @@ describe provider_class do
           { "net.ipv4.ip_forward" = "0" }
         ')
 
-        @logs.first.should_not be_nil
-        @logs.first.message.should == "changed live value from '1' to '0'"
+        expect(@logs.first).not_to be_nil
+        expect(@logs.first.message).to eq("changed live value from '1' to '0'")
       end
 
       it "should not update value with sysctl" do
@@ -322,7 +322,7 @@ describe provider_class do
           { "net.ipv4.ip_forward" = "0" }
         ')
 
-        @logs.first.should be_nil
+        expect(@logs.first).to be_nil
       end
     end
 
@@ -336,8 +336,8 @@ describe provider_class do
         ))
 
         aug_open(target, "Sysctl.lns") do |aug|
-          aug.match("#comment[. = 'SysRq setting']").should_not == []
-          aug.match("#comment[. = 'kernel.sysrq: enables the SysRq feature']").should_not == []
+          expect(aug.match("#comment[. = 'SysRq setting']")).not_to eq([])
+          expect(aug.match("#comment[. = 'kernel.sysrq: enables the SysRq feature']")).not_to eq([])
         end
       end
 
@@ -350,8 +350,8 @@ describe provider_class do
         ))
 
         aug_open(target, "Sysctl.lns") do |aug|
-          aug.match("#comment[. =~ regexp('kernel.sysrq:.*')]").should == []
-          aug.match("#comment[. = 'SysRq setting']").should_not == []
+          expect(aug.match("#comment[. =~ regexp('kernel.sysrq:.*')]")).to eq([])
+          expect(aug.match("#comment[. = 'SysRq setting']")).not_to eq([])
         end
       end
     end
@@ -397,9 +397,9 @@ describe provider_class do
         :provider => "augeas"
       ))
 
-      txn.any_failed?.should_not == nil
-      @logs.first.level.should == :err
-      @logs.first.message.include?(target).should == true
+      expect(txn.any_failed?).not_to eq(nil)
+      expect(@logs.first.level).to eq(:err)
+      expect(@logs.first.message.include?(target)).to eq(true)
     end
   end
 end
