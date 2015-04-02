@@ -1,6 +1,9 @@
-[![Puppet Forge](http://img.shields.io/puppetforge/v/herculesteam/augeasproviders_sysctl.svg)](https://forge.puppetlabs.com/herculesteam/augeasproviders_sysctl)
-[![Build Status](https://travis-ci.org/hercules-team/augeasproviders_sysctl.svg?branch=master)](https://travis-ci.org/hercules-team/augeasproviders_sysctl)
+[![Puppet Forge Version](http://img.shields.io/puppetforge/v/herculesteam/augeasproviders_sysctl.svg)](https://forge.puppetlabs.com/herculesteam/augeasproviders_sysctl)
+[![Puppet Forge Downloads](http://img.shields.io/puppetforge/dt/herculesteam/augeasproviders_sysctl.svg)](https://forge.puppetlabs.com/herculesteam/augeasproviders_sysctl)
+[![Puppet Forge Endorsement](https://img.shields.io/puppetforge/e/herculesteam/augeasproviders_sysctl.svg)](https://forge.puppetlabs.com/herculesteam/augeasproviders_sysctl)
+[![Build Status](https://img.shields.io/travis/hercules-team/augeasproviders_sysctl/master.svg)](https://travis-ci.org/hercules-team/augeasproviders_sysctl)
 [![Coverage Status](https://img.shields.io/coveralls/hercules-team/augeasproviders_sysctl.svg)](https://coveralls.io/r/hercules-team/augeasproviders_sysctl)
+[![Gemnasium](https://img.shields.io/gemnasium/hercules-team/augeasproviders_sysctl.svg)](https://gemnasium.com/hercules-team/augeasproviders_sysctl)
 
 
 # sysctl: type/provider for sysctl for Puppet
