@@ -33,7 +33,7 @@ sudo apt-get install augeas-tools${PKG_VERSION} \
 
 # Install gems
 gem install bundler
-bundle update puppet
+bundle install
 
 # Reporting only
 bundle show
