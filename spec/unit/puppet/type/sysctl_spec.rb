@@ -18,12 +18,22 @@ describe sysctl_type do
         resource = sysctl_type.new :name => 'foo', :val => 'foo'
         expect(resource[:val]).to eq('foo')
       end
+
+      it 'should be munged to a string' do
+        resource = sysctl_type.new :name => 'foo', :val => 42
+        expect(resource[:val]).to eq('42')
+      end
     end
 
     describe 'the value property' do
       it 'should be a valid property' do
         resource = sysctl_type.new :name => 'foo', :value => 'foo'
         expect(resource[:value]).to eq('foo')
+      end
+
+      it 'should be munged to a string' do
+        resource = sysctl_type.new :name => 'foo', :value => 42
+        expect(resource[:value]).to eq('42')
       end
     end
 
