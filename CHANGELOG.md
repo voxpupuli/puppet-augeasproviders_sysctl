@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.2
+
+- Improve Gemfile
+- Do not version Gemfile.lock
+- Add badges to README
+- Munge values to strings
+- Add specs for the sysctl type
+
 ## 2.0.1
 
 - Convert specs to rspec3 syntax
