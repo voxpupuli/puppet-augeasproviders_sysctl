@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.0
+- Added a :silent option for deliberately ignoring failures when applying the
+  live sysctl setting.
+- Added acceptance tests
+
 ## 2.0.2
 
 - Improve Gemfile
