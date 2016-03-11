@@ -95,7 +95,11 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
   def live_value
     if resource[:silent] == :true
       debug("augeasproviders_sysctl not setting live value for #{resource[:name]} due to :silent mode")
-      return resource[:value]
+      if resource[:value]
+        return resource[:value]
+      else
+        return resource[:val]
+      end
     else
       return self.class.sysctl_get(resource[:name])
     end
