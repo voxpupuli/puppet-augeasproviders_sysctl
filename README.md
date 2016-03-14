@@ -104,6 +104,13 @@ Type documentation can be generated with `puppet doc -r type` or viewed on the
       apply  => false,
     }
 
+### ignore the application of a yet to be activated sysctl value
+
+    sysctl { "net.ipv6.conf.all.autoconf":
+      ensure => present,
+      value  => "1",
+      silent => true
+    }
 
 ## Issues
 

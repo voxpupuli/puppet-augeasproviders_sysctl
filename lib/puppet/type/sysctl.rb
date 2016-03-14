@@ -74,7 +74,13 @@ Puppet::Type.newtype(:sysctl) do
   newparam(:apply, :boolean => true) do
     desc "Whether to apply the value using the sysctl command."
     newvalues(:true, :false)
-    defaultto(true)
+    defaultto(:true)
+  end
+
+  newparam(:silent, :boolean => true) do
+    desc "If set, do not report an error if the system key does not exist. This is useful for systems that may need to load a kernel module prior to the sysctl values existing."
+    newvalues(:true, :false)
+    defaultto(:false)
   end
 
   autorequire(:file) do

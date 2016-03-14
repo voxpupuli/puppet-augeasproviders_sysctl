@@ -16,11 +16,19 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
     "$target/#{resource[:name]}"
   end
 
-  def self.sysctl_set(key, value)
-    if Facter.value(:kernel) == :openbsd
-      sysctl("#{key}=#{value}")
-    else
-      sysctl('-w', %Q{#{key}=#{value}})
+  def self.sysctl_set(key, value, silent=false)
+    begin
+      if Facter.value(:kernel) == :openbsd
+        sysctl("#{key}=#{value}")
+      else
+        sysctl('-w', %Q{#{key}=#{value}})
+      end
+    rescue Puppet::ExecutionFailure => e
+      if silent
+        debug("augeasprovider_sysctl ignoring failed attempt to set #{key} due to :silent mode")
+      else
+        raise e
+      end
     end
   end
 
@@ -85,7 +93,16 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
   end
 
   def live_value
-    self.class.sysctl_get(resource[:name])
+    if resource[:silent] == :true
+      debug("augeasproviders_sysctl not setting live value for #{resource[:name]} due to :silent mode")
+      if resource[:value]
+        return resource[:value]
+      else
+        return resource[:val]
+      end
+    else
+      return self.class.sysctl_get(resource[:name])
+    end
   end
 
   attr_aug_accessor(:value, :label => :resource)
@@ -115,8 +132,9 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
   def flush
     super
     value = resource[:value] || resource[:val]
-    if resource[:apply] == :true and not value.nil?
-      self.class.sysctl_set(resource[:name], value)
+    if resource[:apply] == :true && !value.nil?
+      silent = (resource[:silent] == :true)
+      self.class.sysctl_set(resource[:name], value, silent)
     end
   end
 end
