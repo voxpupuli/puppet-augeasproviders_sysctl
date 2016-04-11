@@ -42,4 +42,7 @@ group :development, :unit_tests do
   gem 'simplecov', '~> 0.7.0',                             :require => false
   gem 'yard',                                              :require => false
   gem 'redcarpet', '~> 2.0',                               :require => false
+
+  # mime-types-data requires Ruby version >= 2.0
+  gem 'mime-types', '2.6.2' if RUBY_VERSION =~ /^1\.9/
 end
