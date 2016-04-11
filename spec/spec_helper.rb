@@ -5,7 +5,7 @@ $LOAD_PATH.unshift(dir, File.join(dir, 'fixtures/modules/augeasproviders_core/sp
 require 'rubygems'
 
 require 'simplecov'
-unless RUBY_VERSION =~ /^1\./
+unless RUBY_VERSION =~ /^1\.8/
   require 'coveralls'
   SimpleCov.formatter = Coveralls::SimpleCov::Formatter
 end
