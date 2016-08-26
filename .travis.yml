@@ -6,7 +6,6 @@ rvm:
   - 2.0.0
 notifications:
   email:
-   - dcleal@redhat.com
    - raphael.pinson@camptocamp.com
 env:
 # base env
