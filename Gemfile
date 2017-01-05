@@ -25,7 +25,7 @@ group :development, :unit_tests do
   gem 'json', '< 2.0',                                     :require => false if RUBY_VERSION =~ /^1\.[89]/
   gem 'json_pure', '< 2.0',                                :require => false if RUBY_VERSION =~ /^1\.[89]/
   gem 'rspec-puppet',                                      :require => false
-  gem 'puppetlabs_spec_helper', '< 1.2.0',                 :require => false
+  gem 'puppetlabs_spec_helper',                            :require => false
   gem 'metadata-json-lint',                                :require => false
   gem 'puppet-lint',                                       :require => false
   gem 'puppet-lint-unquoted_string-check',                 :require => false

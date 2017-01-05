@@ -10,7 +10,6 @@ notifications:
 env:
 # base env
   # Most tests with oldest supported ruby-augeas
-  - PUPPET=2.7.0 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0
   - PUPPET=3.0.0 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0
   - PUPPET=3.2.0 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0
   - PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0
@@ -19,11 +18,8 @@ env:
     # Use this build to publish on the forge
   - PUPPET=3.4 RUBY_AUGEAS=0.5 FORGE_PUBLISH=true
   # Test other versions of Augeas
-  - PUPPET=2.7.0 RUBY_AUGEAS=0.3.0 AUGEAS=0.10.0
   - PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=0.10.0
-  - PUPPET=2.7.0 RUBY_AUGEAS=0.3.0 AUGEAS=1.0.0
   - PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=1.0.0
-  - PUPPET=2.7.0 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0
   - PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0
   - PUPPET=2.7.0 RUBY_AUGEAS=0.3.0 AUGEAS=1.2.0
   - PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=1.2.0
@@ -42,27 +38,17 @@ matrix:
 # base exclude
     # No support for Ruby 2.0 before Puppet 3.2.0 and ruby-augeas 0.5
     - rvm: 2.0.0
-      env: PUPPET=2.7.0 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0
-    - rvm: 2.0.0
       env: PUPPET=3.0.0 RUBY_AUGEAS=0.3.0
     - rvm: 2.0.0
       env: PUPPET=3.2.0 RUBY_AUGEAS=0.3.0
     - rvm: 2.0.0
       env: PUPPET=3.4 RUBY_AUGEAS=0.3.0
     - rvm: 2.0.0
-      env: PUPPET=2.7.0 RUBY_AUGEAS=0.3.0 AUGEAS=0.10.0
-    - rvm: 2.0.0
       env: PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=0.10.0
-    - rvm: 2.0.0
-      env: PUPPET=2.7.0 RUBY_AUGEAS=0.3.0 AUGEAS=1.0.0
     - rvm: 2.0.0
       env: PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=1.0.0
     - rvm: 2.0.0
-      env: PUPPET=2.7.0 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0
-    - rvm: 2.0.0
       env: PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0
-    - rvm: 2.0.0
-      env: PUPPET=2.7.0 RUBY_AUGEAS=0.3.0 AUGEAS=1.2.0
     - rvm: 2.0.0
       env: PUPPET=3.0.0 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0
     - rvm: 2.0.0
