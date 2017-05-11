@@ -25,6 +25,21 @@
       ]
     },
     {
+      "operatingsystem": "FreeBSD",
+      "operatingsystemrelease": [
+        "10",
+        "11",
+        "12"
+      ]
+    },
+    {
+      "operatingsystem": "OpenBSD",
+      "operatingsystemrelease": [
+        "5",
+        "6"
+      ]
+    },
+    {
       "operatingsystem": "Ubuntu",
       "operatingsystemrelease": [
         "12.04",
