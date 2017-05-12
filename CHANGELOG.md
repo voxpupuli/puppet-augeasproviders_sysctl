@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.2.0
+- Added OpenBSD and FreeBSD to the compatibility list
+- Added a :persist option for enabling saving to the /etc/sysctl.conf file
+- Added the capability to update either the live value *or* the disk value
+  independently
+- Now use prefetching to get the sysctl values
+- Updated self.instances to obtain information about *all* sysctl values which
+  provides a more accurate representation of the system when using `puppet
+  resource`
+- Updated all tests
+
 ## 2.1.0
 - Added a :silent option for deliberately ignoring failures when applying the
   live sysctl setting.

@@ -60,5 +60,22 @@ describe sysctl_type do
         expect(resource[:apply]).to eq(:true)
       end
     end
+
+    describe 'the persist parameter' do
+      it 'should be a valid parameter' do
+        resource = sysctl_type.new :name => 'foo', :persist => :false
+        expect(resource[:persist]).to eq(:false)
+      end
+
+      it 'should default to true' do
+        resource = sysctl_type.new :name => 'foo'
+        expect(resource[:persist]).to eq(:true)
+      end
+
+      it 'should be munged as a boolean' do
+        resource = sysctl_type.new :name => 'foo', :persist => 'true'
+        expect(resource[:persist]).to eq(:true)
+      end
+    end
   end
 end

@@ -104,6 +104,14 @@ Type documentation can be generated with `puppet doc -r type` or viewed on the
       apply  => false,
     }
 
+### only update the value with the `sysctl` command, do not persist to disk
+
+    sysctl { "net.ipv4.ip_forward":
+      ensure  => present,
+      value   => "1",
+      persist => false,
+    }
+
 ### ignore the application of a yet to be activated sysctl value
 
     sysctl { "net.ipv6.conf.all.autoconf":
