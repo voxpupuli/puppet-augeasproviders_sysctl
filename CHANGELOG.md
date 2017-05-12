@@ -1,6 +1,8 @@
 # Changelog
 
 ## 2.2.0
+- Removed Travis tests for Puppet < 4.7 since that is the most common LTS
+  release and Puppet 3 is well out of support
 - Added OpenBSD and FreeBSD to the compatibility list
 - Added a :persist option for enabling saving to the /etc/sysctl.conf file
 - Added the capability to update either the live value *or* the disk value
