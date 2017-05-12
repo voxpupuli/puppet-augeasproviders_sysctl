@@ -1,5 +1,5 @@
 language: ruby
-sudo: false
+sudo: required
 rvm:
   - 2.1.9
 notifications:
