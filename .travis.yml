@@ -8,7 +8,6 @@ notifications:
 env:
   # Most common LTS Puppet Version
   - PUPPET=4.7 RUBY_AUGEAS=0.5 FORGE_PUBLISH=true
-
   # Current LTS Puppet Version
   - PUPPET=4.10 RUBY_AUGEAS=0.5
 
@@ -39,7 +38,6 @@ matrix:
     - rvm: 2.1.9
       env: PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0 LENSES=HEAD
     # No support for Ruby 1.8 in Puppet 4
-
 
 install:
   - "travis_retry ./.travis.sh"
