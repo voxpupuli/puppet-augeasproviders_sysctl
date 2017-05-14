@@ -1,5 +1,5 @@
 HOSTS:
-  server:
+  centos7:
     roles:
       - server
       - default
@@ -7,21 +7,27 @@ HOSTS:
     platform:   el-7-x86_64
     box:        centos/7
     hypervisor: vagrant
-  centos-client:
+  centos6:
     roles:
       - agent
       - client
     platform:   el-6-x86_64
     box:        centos/6
     hypervisor: vagrant
-# Needs testing
-#  ubuntu-client:
-#    roles:
-#      - agent
-#      - client
-#    platform:   ubuntu-14.04-x86_64
-#    box:        ubuntu/trusty64
-#    hypervisor: vagrant
+  ubuntu14-04:
+    roles:
+      - agent
+      - client
+    platform:   ubuntu-14.04-x86_64
+    box:        ubuntu/trusty64
+    hypervisor: vagrant
+  opensuse-42-2:
+    roles:
+      - agent
+      - client
+    platform: sles-12-x86_64
+    box: opensuse/openSUSE-42.2-x86_64
+    hypervisor: vagrant
 CONFIG:
   log_level: verbose
   type:      aio
