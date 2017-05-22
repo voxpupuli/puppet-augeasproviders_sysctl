@@ -2,6 +2,8 @@ language: ruby
 sudo: required
 rvm:
   - 2.1.9
+  - 2.3.1
+
 notifications:
   email:
    - raphael.pinson@camptocamp.com
@@ -11,33 +13,8 @@ env:
   # Current LTS Puppet Version
   - PUPPET=4.10 RUBY_AUGEAS=0.5
 
-
 matrix:
   fast_finish: true
-  exclude:
-# base exclude
-    # No support for Ruby 2.0 before Puppet 3.2.0 and ruby-augeas 0.5
-    - rvm: 2.1.9
-      env: PUPPET=3.0.0 RUBY_AUGEAS=0.3.0
-    - rvm: 2.1.9
-      env: PUPPET=3.2.0 RUBY_AUGEAS=0.3.0
-    - rvm: 2.1.9
-      env: PUPPET=3.4 RUBY_AUGEAS=0.3.0
-    - rvm: 2.1.9
-      env: PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=0.10.0
-    - rvm: 2.1.9
-      env: PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=1.0.0
-    - rvm: 2.1.9
-      env: PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0
-    - rvm: 2.1.9
-      env: PUPPET=3.0.0 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0
-    - rvm: 2.1.9
-      env: PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=1.2.0
-    - rvm: 2.1.9
-      env: PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=1.0.0 LENSES=HEAD
-    - rvm: 2.1.9
-      env: PUPPET=3.4 RUBY_AUGEAS=0.3.0 AUGEAS=1.1.0 LENSES=HEAD
-    # No support for Ruby 1.8 in Puppet 4
 
 install:
   - "travis_retry ./.travis.sh"
