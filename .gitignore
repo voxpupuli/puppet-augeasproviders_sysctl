@@ -1,3 +1,4 @@
+Gemfile.lock
 pkg
 coverage
 .bundle/
@@ -9,6 +10,7 @@ spec/fixtures/manifests
 spec/fixtures/modules
 yardoc/
 .yardoc/
+log/
 
 ## Ruby
 .rvmrc*

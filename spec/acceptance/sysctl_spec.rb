@@ -84,7 +84,7 @@ describe 'Sysctl Tests' do
         it 'should work with no errors' do
           apply_manifest_on(host, manifest, :catch_failures => true)
         end
-  
+
         it 'should be idempotent' do
           apply_manifest_on(host, manifest, {:catch_changes => true})
         end
@@ -104,9 +104,93 @@ describe 'Sysctl Tests' do
         it 'should work with no errors' do
           apply_manifest_on(host, manifest, :catch_failures => true)
         end
-  
+
         it 'should be idempotent' do
           apply_manifest_on(host, manifest, {:catch_changes => true})
+        end
+      end
+
+      context 'when only applying to the running system' do
+        let(:manifest) {
+          <<-EOM
+            sysctl { 'kernel.pty.max':
+              value   => 4097,
+              apply   => true,
+              persist => false
+            }
+          EOM
+        }
+
+        # Using puppet_apply as a helper
+        it 'should work with no errors' do
+          apply_manifest_on(host, manifest, :catch_failures => true)
+        end
+
+        it 'should be idempotent' do
+          apply_manifest_on(host, manifest, {:catch_changes => true})
+        end
+
+        it 'should not be in /etc/sysctl.conf' do
+          on(host, 'grep kernel.pty.max /etc/sysctl.conf', :acceptable_exit_codes => [1])
+        end
+      end
+
+      context 'when only applying to the filesystem' do
+        let(:manifest) {
+          <<-EOM
+            sysctl { 'kernel.pty.max':
+              comment => 'just a test',
+              value   => 4098,
+              apply   => false,
+              persist => true
+            }
+          EOM
+        }
+
+        # Using puppet_apply as a helper
+        it 'should work with no errors' do
+          apply_manifest_on(host, manifest, :catch_failures => true)
+        end
+
+        it 'should be idempotent' do
+          apply_manifest_on(host, manifest, {:catch_changes => true})
+        end
+
+        it 'should be in /etc/sysctl.conf' do
+          on(host, 'grep "kernel.pty.max = 4098" /etc/sysctl.conf')
+        end
+
+        it 'should not be changed on the running system' do
+          result = on(host, 'sysctl -n kernel.pty.max').stdout.strip
+          expect(result).to eql('4097')
+        end
+      end
+
+      context 'when deleting an entry' do
+        let(:manifest) {
+          <<-EOM
+            sysctl { 'kernel.pty.max':
+              ensure  => absent
+            }
+          EOM
+        }
+
+        # Using puppet_apply as a helper
+        it 'should work with no errors' do
+          apply_manifest_on(host, manifest, :catch_failures => true)
+        end
+
+        it 'should be idempotent' do
+          apply_manifest_on(host, manifest, {:catch_changes => true})
+        end
+
+        it 'should not be in /etc/sysctl.conf' do
+          on(host, 'grep "kernel.pty.max" /etc/sysctl.conf', :acceptable_exit_codes => [1])
+        end
+
+        it 'should not be changed on the running system' do
+          result = on(host, 'sysctl -n kernel.pty.max').stdout.strip
+          expect(result).to eql('4097')
         end
       end
     end

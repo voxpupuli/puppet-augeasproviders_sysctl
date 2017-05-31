@@ -15,12 +15,25 @@ Puppet::Type.newtype(:sysctl) do
 
   module SysctlValueSync
     def insync?(is)
-      if resource[:apply] == :true
-        @live_value = provider.live_value
-        equal(should, is) and equal(should, @live_value)
+      _is_insync = true
+
+      if provider.valid_resource?(resource[:name])
+        if resource[:apply] == :true
+          @live_value = provider.live_value
+
+          _is_insync = equal(should, @live_value)
+        end
+
+        if _is_insync && (resource[:persist] == :true)
+            _is_insync = equal(should, is)
+        end
       else
-        equal(should, is)
+        # We won't get here unless exists? has been short circuited so we can
+        # rely on that to raise an approprite error.
+        debug("augeasproviders_sysctl: skipping insync? due to invalid resource `#{resource[:name]}`")
       end
+
+      return _is_insync
     end
 
     def change_to_s(current, new)
@@ -30,7 +43,11 @@ Puppet::Type.newtype(:sysctl) do
         elsif equal(@live_value, new)
           return "changed configuration value from '#{current}' to '#{new}'"
         else
-          return "changed configuration value from '#{current}' to '#{new}' and live value from '#{@live_value}' to '#{new}'"
+          if resource[:persist] == :true
+            return "changed configuration value from '#{current}' to '#{new}' and live value from '#{@live_value}' to '#{new}'"
+          else
+            return "changed live value from '#{@live_value}' to '#{new}'"
+          end
         end
       else
         return "changed configuration value from '#{current}' to '#{new}'"
@@ -38,7 +55,7 @@ Puppet::Type.newtype(:sysctl) do
     end
 
     def equal(a, b)
-      a.gsub(/\s+/, ' ') == b.gsub(/\s+/, ' ')
+      a && b && (a.gsub(/\s+/, ' ') == b.gsub(/\s+/, ' '))
     end
   end
 
@@ -73,6 +90,12 @@ Puppet::Type.newtype(:sysctl) do
 
   newparam(:apply, :boolean => true) do
     desc "Whether to apply the value using the sysctl command."
+    newvalues(:true, :false)
+    defaultto(:true)
+  end
+
+  newparam(:persist, :boolean => true) do
+    desc "Persist the value in the on-disk file ($target)."
     newvalues(:true, :false)
     defaultto(:true)
   end
