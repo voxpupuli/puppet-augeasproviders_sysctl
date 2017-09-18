@@ -78,10 +78,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
     resources ||= []
 
     sysctl('-a').each_line do |line|
-      value = line.split(/(=|:)/)
-
-      key = value.shift.strip
-      value = value.shift.to_s.strip
+      key, value = line.split(/\s?[=:]\s?/,2)
 
       existing_index = resources.index{ |x| x[:name] == key }
 
