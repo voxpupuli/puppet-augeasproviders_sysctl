@@ -3,6 +3,7 @@ sudo: required
 rvm:
   - 2.1.9
   - 2.3.1
+  - 2.4.4
 
 notifications:
   email:
@@ -10,11 +11,16 @@ notifications:
 env:
   # Most common LTS Puppet Version
   - PUPPET=4.7 RUBY_AUGEAS=0.5 FORGE_PUBLISH=true
-  # Current LTS Puppet Version
+  # Current Puppet 4 LTS Puppet Version
   - PUPPET=4.10 RUBY_AUGEAS=0.5
+  # Current Puppet 5 LTS Puppet Version
+  - PUPPET=5.5 RUBY_AUGEAS=0.5
 
 matrix:
   fast_finish: true
+  exclude:
+    - rvm: 2.1.9
+      env: PUPPET=5.5 RUBY_AUGEAS=0.5
 
 install:
   - "travis_retry ./.travis.sh"
