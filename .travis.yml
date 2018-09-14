@@ -18,6 +18,9 @@ env:
 
 matrix:
   fast_finish: true
+  execlude:
+    - rvm: 2.1.9
+      env: PUPPET=5.5 RUBY_AUGEAS=0.5
 
 install:
   - "travis_retry ./.travis.sh"
