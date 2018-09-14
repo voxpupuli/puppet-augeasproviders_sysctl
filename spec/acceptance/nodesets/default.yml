@@ -25,9 +25,24 @@ HOSTS:
     roles:
       - agent
       - client
-    platform: sles-12-x86_64
-    box: opensuse/openSUSE-42.2-x86_64
+    platform:   sles-12-x86_64
+    box:        opensuse/openSUSE-42.2-x86_64
     hypervisor: vagrant
+  oel7:
+    roles:
+      - agent
+      - client
+    platform:   el-7-x86_64
+    box:        elastic/oel-7-x86_64
+    hypervisor: vagrant
+  oel6:
+    roles:
+      - agent
+      - client
+    platform:   el-6-x86_64
+    box:        elastic/oel-6-x86_64
+    hypervisor: vagrant
+
 CONFIG:
   log_level: verbose
   type:      aio

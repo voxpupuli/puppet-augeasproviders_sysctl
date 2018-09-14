@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.2.1
+- Added support for Puppet 5 and OEL
+
 ## 2.2.0
 - Removed Travis tests for Puppet < 4.7 since that is the most common LTS
   release and Puppet 3 is well out of support
