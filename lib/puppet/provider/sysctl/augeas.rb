@@ -77,7 +77,13 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
     # Grab everything else
     resources ||= []
 
-    sysctl('-a').each_line do |line|
+    sysctlArgs='-a'
+    # If we are on FreeBSD, provide -e which uses '=' instead of ':' to delimit values
+    if Facter.value(:kernel) == "FreeBSD"
+        sysctlArgs='-ae'
+    end
+
+    sysctl(sysctlArgs).each_line do |line|
       value = line.split('=')
 
       key = value.shift.strip
