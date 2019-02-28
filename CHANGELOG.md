@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.3.0
+
+- Add support for Puppet 6
+- Deprecate support for Puppet < 5
+- Update supported OSes in metadata.json
+
 ## 2.2.1
 - Added support for Puppet 5 and OEL
 
