@@ -1,7 +1,6 @@
 language: ruby
 sudo: required
 rvm:
-  # Ruby with Puppet 5
   - 2.4.4
 notifications:
   email:
@@ -12,6 +11,7 @@ env:
   - PUPPET=5.5 RUBY_AUGEAS=0.5 FORGE_PUBLISH=true
   # Test latest Puppet version
   - PUPPET=6 RUBY_AUGEAS=0.5
+
 
 matrix:
   fast_finish: true

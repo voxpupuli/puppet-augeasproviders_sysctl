@@ -43,6 +43,7 @@ if ver >= Gem::Version.new("2.7.20")
         File.join(dir, 'fixtures/modules/augeasproviders_core/lib')
     )
 
+    
     $LOAD_PATH.unshift(File.join(dir, '..', 'lib'))
 end
 
