@@ -77,12 +77,17 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
     # Grab everything else
     resources ||= []
 
+    sep = '='
+    if Facter.value(:kernel) == 'FreeBSD'
+      sep = ':'
+    end
+
     sysctl('-a').each_line do |line|
-      value = line.split('=')
+      value = line.split(sep)
 
       key = value.shift.strip
 
-      value = value.join('=').strip
+      value = value.join(sep).strip
 
       existing_index = resources.index{ |x| x[:name] == key }
 
