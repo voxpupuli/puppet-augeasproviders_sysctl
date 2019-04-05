@@ -394,6 +394,23 @@ describe provider_class do
         expect(@logs.first).not_to be_nil
         expect(@logs.first.message).to eq("changed live value from '0' to '1'")
       end
+
+      it "should not add comment to the value on disk" do
+        apply!(Puppet::Type.type(:sysctl).new(
+          :name     => "net.ipv4.ip_forward",
+          :target   => target,
+          :provider => "augeas",
+          :persist  => false,
+          :comment  => "This is a test"
+        ))
+
+        aug_open(target, "Sysctl.lns") do |aug|
+          aug.get("net.ipv4.ip_forward").should eq "0"
+          aug.get("#comment[4]").should eq "Controls IP packet forwarding"
+        end
+
+        expect(@logs.first).to be_nil
+      end
     end
   end
 
