@@ -56,6 +56,29 @@ describe 'Sysctl Tests' do
         expect(result).to eql('100001')
       end
 
+      context 'with hex value' do
+        let(:manifest) {
+          <<-EOM
+            sysctl { 'kernel.shmmax':
+              value => 0xffffffffffffffff
+            }
+          EOM
+        }
+
+        it 'should work with no errors' do
+          apply_manifest_on(host, manifest, :catch_failures => true)
+        end
+
+        it 'should be idempotent' do
+          apply_manifest_on(host, manifest, {:catch_changes => true})
+        end
+
+        it 'should apply successfuly in the config and live' do
+          result = on(host, 'sysctl -n kernel.shmmax').stdout.strip
+          expect(result).to eql('0xffffffffffffffff')
+        end
+      end
+
       context 'when given an invalid key' do
         let(:manifest) {
           <<-EOM
