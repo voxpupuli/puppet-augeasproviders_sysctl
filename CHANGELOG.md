@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.4.0
+
+- Add Archlinux support (GH #38)
+- Use : as separator on FreeBSD (fix #24) (GH #30)
+- Do not manage comment when persist is false (fix #29) (GH #31)
+
 ## 2.3.1
 
 - Fix puppet requirement to < 7.0.0
