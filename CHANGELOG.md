@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.5.0
+
+- Add support for:
+  - Debian 10
+  - EL 8
+
 ## 2.4.0
 
 - Add Archlinux support (GH #38)
