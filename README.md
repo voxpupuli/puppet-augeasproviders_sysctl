@@ -4,6 +4,7 @@
 [![Build Status](https://img.shields.io/travis/hercules-team/augeasproviders_sysctl/master.svg)](https://travis-ci.org/hercules-team/augeasproviders_sysctl)
 [![Coverage Status](https://img.shields.io/coveralls/hercules-team/augeasproviders_sysctl.svg)](https://coveralls.io/r/hercules-team/augeasproviders_sysctl)
 [![Gemnasium](https://img.shields.io/gemnasium/hercules-team/augeasproviders_sysctl.svg)](https://gemnasium.com/hercules-team/augeasproviders_sysctl)
+[![Sponsor](https://img.shields.io/badge/%E2%99%A5-Sponsor-hotpink.svg)](https://github.com/sponsors/raphink)
 
 
 # sysctl: type/provider for sysctl for Puppet
