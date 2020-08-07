@@ -119,22 +119,22 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
   end
 
   def create
-    if resource[:persist] == :true
-      if !valid_resource?(resource[:name]) && (resource[:silent] == :false)
-        raise Puppet::Error, "Error: `#{resource[:name]}` is not a valid sysctl key"
-      end
+    return unless resource[:persist] == :true
 
-      # the value to pass to augeas can come either from the 'value' or the
-      # 'val' type parameter.
-      value = resource[:value] || resource[:val]
+    if !valid_resource?(resource[:name]) && (resource[:silent] == :false)
+      raise Puppet::Error, "Error: `#{resource[:name]}` is not a valid sysctl key"
+    end
 
-      augopen! do |aug|
-        # Prefer to create the node next to a commented out entry
-        commented = aug.match("$target/#comment[.=~regexp('#{resource[:name]}([^a-z\.].*)?')]")
-        aug.insert(commented.first, resource[:name], false) unless commented.empty?
-        aug.set(resource_path, value)
-        setvars(aug)
-      end
+    # the value to pass to augeas can come either from the 'value' or the
+    # 'val' type parameter.
+    value = resource[:value] || resource[:val]
+
+    augopen! do |aug|
+      # Prefer to create the node next to a commented out entry
+      commented = aug.match("$target/#comment[.=~regexp('#{resource[:name]}([^a-z\.].*)?')]")
+      aug.insert(commented.first, resource[:name], false) unless commented.empty?
+      aug.set(resource_path, value)
+      setvars(aug)
     end
   end
 
@@ -149,25 +149,16 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
     # might be used to clean up /etc/sysctl.conf
     if resource[:ensure] != :absent
       unless valid_resource?(resource[:name])
-        if resource[:silent] == :true
-          debug("augeasproviders_sysctl: `#{resource[:name]}` is not a valid sysctl key")
-          return true
-        else
-          raise Puppet::Error, "Error: `#{resource[:name]}` is not a valid sysctl key"
-        end
+        raise Puppet::Error, "Error: `#{resource[:name]}` is not a valid sysctl key" unless resource[:silent] == :true
+        debug("augeasproviders_sysctl: `#{resource[:name]}` is not a valid sysctl key")
+        true
       end
     end
 
-    if @property_hash[:ensure] == :present
-      # Short circuit this if there's nothing to do
-      if (resource[:ensure] == :absent) && (@property_hash[:persist] == :false)
-        return false
-      else
-        return true
-      end
-    else
-      super
-    end
+    super unless @property_hash[:ensure] == :present
+
+    return false if (resource[:ensure] == :absent) && (@property_hash[:persist] == :false)
+    true
   end
 
   define_aug_method!(:destroy) do |aug, resource|
@@ -176,16 +167,11 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
   end
 
   def live_value
-    if resource[:silent] == :true
-      debug("augeasproviders_sysctl not setting live value for #{resource[:name]} due to :silent mode")
-      if resource[:value]
-        return resource[:value]
-      else
-        return resource[:val]
-      end
-    else
-      self.class.sysctl_get(resource[:name])
-    end
+    return self.class.sysctl_get(resource[:name]) unless resource[:silent] == :true
+
+    debug("augeasproviders_sysctl not setting live value for #{resource[:name]} due to :silent mode")
+    return resource[:value] if resource[:value]
+    resource[:val]
   end
 
   attr_aug_accessor(:value, label: :resource)
