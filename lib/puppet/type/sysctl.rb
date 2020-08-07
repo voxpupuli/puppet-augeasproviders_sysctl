@@ -16,17 +16,17 @@ Puppet::Type.newtype(:sysctl) do
   # Patch sysctl value property
   module SysctlValueSync
     def insync?(is)
-      _is_insync = true
+      is_insync = true
 
       if provider.valid_resource?(resource[:name])
         if resource[:apply] == :true
           @live_value = provider.live_value
 
-          _is_insync = equal(should, @live_value)
+          is_insync = equal(should, @live_value)
         end
 
-        if _is_insync && (resource[:persist] == :true)
-          _is_insync = equal(should, is)
+        if is_insync && (resource[:persist] == :true)
+          is_insync = equal(should, is)
         end
       else
         # We won't get here unless exists? has been short circuited so we can
@@ -34,7 +34,7 @@ Puppet::Type.newtype(:sysctl) do
         debug("augeasproviders_sysctl: skipping insync? due to invalid resource `#{resource[:name]}`")
       end
 
-      _is_insync
+      is_insync
     end
 
     def change_to_s(current, new)
