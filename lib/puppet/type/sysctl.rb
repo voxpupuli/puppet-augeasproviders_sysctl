@@ -82,7 +82,9 @@ Puppet::Type.newtype(:sysctl) do
   end
 
   newproperty(:comment) do
-    desc 'Text to be stored in a comment immediately above the entry.  It will be automatically prepended with the name of the setting in order for the provider to know whether it controls the comment or not.'
+    desc 'Text to be stored in a comment immediately above the entry.
+    It will be automatically prepended with the name of the setting in order
+    for the provider to know whether it controls the comment or not.'
 
     def insync?(is)
       return true unless resource[:persist] == :true
