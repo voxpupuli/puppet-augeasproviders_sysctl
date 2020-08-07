@@ -7,7 +7,6 @@
   "source": "https://github.com/hercules-team/augeasproviders_sysctl",
   "project_page": "https://github.com/hercules-team/augeasproviders_sysctl",
   "issues_url": "https://github.com/hercules-team/augeasproviders_sysctl/issues",
-  "description": "This module provides type/provider for sysctl using the Augeas configuration API library.",
   "dependencies": [
     {
       "name": "herculesteam/augeasproviders_core",
@@ -83,6 +82,13 @@
     }
   ],
   "requirements": [
-    { "name": "puppet", "version_requirement": ">= 5.0.0 < 7.0.0" }
-  ]
+    {
+      "name": "puppet",
+      "version_requirement": ">= 5.0.0 < 7.0.0"
+    }
+  ],
+  "description": "This module provides type/provider for sysctl using the Augeas configuration API library.",
+  "pdk-version": "1.17.0",
+  "template-url": "pdk-default#1.17.0",
+  "template-ref": "tags/1.17.0-0-gd3a4319"
 }
