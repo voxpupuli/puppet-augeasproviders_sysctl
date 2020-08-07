@@ -38,20 +38,16 @@ Puppet::Type.newtype(:sysctl) do
     end
 
     def change_to_s(current, new)
-      if resource[:apply] == :true
-        if equal(current, new)
-          "changed live value from '#{@live_value}' to '#{new}'"
-        elsif equal(@live_value, new)
-          "changed configuration value from '#{current}' to '#{new}'"
-        else
-          if resource[:persist] == :true
-            "changed configuration value from '#{current}' to '#{new}' and live value from '#{@live_value}' to '#{new}'"
-          else
-            "changed live value from '#{@live_value}' to '#{new}'"
-          end
-        end
-      else
+      return "changed configuration value from '#{current}' to '#{new}'" unless resource[:apply] == :true
+
+      if equal(current, new)
+        "changed live value from '#{@live_value}' to '#{new}'"
+      elsif equal(@live_value, new)
         "changed configuration value from '#{current}' to '#{new}'"
+      elsif resource[:persist] == :true
+        "changed configuration value from '#{current}' to '#{new}' and live value from '#{@live_value}' to '#{new}'"
+      else
+        "changed live value from '#{@live_value}' to '#{new}'"
       end
     end
 
