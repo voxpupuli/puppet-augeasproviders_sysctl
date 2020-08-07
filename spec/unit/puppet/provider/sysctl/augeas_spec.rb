@@ -22,6 +22,7 @@ describe provider_class do
     ].join("\n"))
   end
 
+  # rubocop:disable RSpec/InstanceVariable
   before(:all) { @tmpdir = Dir.mktmpdir }
   after(:all) { FileUtils.remove_entry_secure @tmpdir }
 
