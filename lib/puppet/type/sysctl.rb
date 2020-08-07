@@ -13,6 +13,7 @@ Puppet::Type.newtype(:sysctl) do
     isnamevar
   end
 
+  # Patch sysctl value property
   module SysctlValueSync
     def insync?(is)
       _is_insync = true
