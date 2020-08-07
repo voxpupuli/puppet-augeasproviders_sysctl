@@ -4,12 +4,12 @@
 # Licensed under the Apache License, Version 2.0
 
 Puppet::Type.newtype(:sysctl) do
-  @doc = "Manages entries in /etc/sysctl.conf."
+  @doc = 'Manages entries in /etc/sysctl.conf.'
 
   ensurable
 
   newparam(:name) do
-    desc "The name of the setting, e.g. net.ipv4.ip_forward"
+    desc 'The name of the setting, e.g. net.ipv4.ip_forward'
     isnamevar
   end
 
@@ -25,7 +25,7 @@ Puppet::Type.newtype(:sysctl) do
         end
 
         if _is_insync && (resource[:persist] == :true)
-            _is_insync = equal(should, is)
+          _is_insync = equal(should, is)
         end
       else
         # We won't get here unless exists? has been short circuited so we can
@@ -33,29 +33,29 @@ Puppet::Type.newtype(:sysctl) do
         debug("augeasproviders_sysctl: skipping insync? due to invalid resource `#{resource[:name]}`")
       end
 
-      return _is_insync
+      _is_insync
     end
 
     def change_to_s(current, new)
       if resource[:apply] == :true
         if equal(current, new)
-          return "changed live value from '#{@live_value}' to '#{new}'"
+          "changed live value from '#{@live_value}' to '#{new}'"
         elsif equal(@live_value, new)
-          return "changed configuration value from '#{current}' to '#{new}'"
+          "changed configuration value from '#{current}' to '#{new}'"
         else
           if resource[:persist] == :true
-            return "changed configuration value from '#{current}' to '#{new}' and live value from '#{@live_value}' to '#{new}'"
+            "changed configuration value from '#{current}' to '#{new}' and live value from '#{@live_value}' to '#{new}'"
           else
-            return "changed live value from '#{@live_value}' to '#{new}'"
+            "changed live value from '#{@live_value}' to '#{new}'"
           end
         end
       else
-        return "changed configuration value from '#{current}' to '#{new}'"
+        "changed configuration value from '#{current}' to '#{new}'"
       end
     end
 
     def equal(a, b)
-      a && b && (a.gsub(/\s+/, ' ') == b.gsub(/\s+/, ' '))
+      a && b && (a.gsub(%r{\s+}, ' ') == b.gsub(%r{\s+}, ' '))
     end
   end
 
@@ -70,7 +70,7 @@ Puppet::Type.newtype(:sysctl) do
   end
 
   newproperty(:value) do
-    desc "Value to change the setting to. Settings with multiple values (such as net.ipv4.tcp_mem) are represented as a single whitespace separated string."
+    desc 'Value to change the setting to. Settings with multiple values (such as net.ipv4.tcp_mem) are represented as a single whitespace separated string.'
 
     munge do |val|
       val.to_s
@@ -85,7 +85,7 @@ Puppet::Type.newtype(:sysctl) do
   end
 
   newproperty(:comment) do
-    desc "Text to be stored in a comment immediately above the entry.  It will be automatically prepended with the name of the setting in order for the provider to know whether it controls the comment or not."
+    desc 'Text to be stored in a comment immediately above the entry.  It will be automatically prepended with the name of the setting in order for the provider to know whether it controls the comment or not.'
 
     def insync?(is)
       return true unless resource[:persist] == :true
@@ -93,20 +93,20 @@ Puppet::Type.newtype(:sysctl) do
     end
   end
 
-  newparam(:apply, :boolean => true) do
-    desc "Whether to apply the value using the sysctl command."
+  newparam(:apply, boolean: true) do
+    desc 'Whether to apply the value using the sysctl command.'
     newvalues(:true, :false)
     defaultto(:true)
   end
 
-  newparam(:persist, :boolean => true) do
-    desc "Persist the value in the on-disk file ($target)."
+  newparam(:persist, boolean: true) do
+    desc 'Persist the value in the on-disk file ($target).'
     newvalues(:true, :false)
     defaultto(:true)
   end
 
-  newparam(:silent, :boolean => true) do
-    desc "If set, do not report an error if the system key does not exist. This is useful for systems that may need to load a kernel module prior to the sysctl values existing."
+  newparam(:silent, boolean: true) do
+    desc 'If set, do not report an error if the system key does not exist. This is useful for systems that may need to load a kernel module prior to the sysctl values existing.'
     newvalues(:true, :false)
     defaultto(:false)
   end

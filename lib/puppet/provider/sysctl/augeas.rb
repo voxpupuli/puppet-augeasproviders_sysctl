@@ -3,33 +3,31 @@
 # Copyright (c) 2012 Dominic Cleal
 # Licensed under the Apache License, Version 2.0
 
-raise("Missing augeasproviders_core dependency") if Puppet::Type.type(:augeasprovider).nil?
-Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeasprovider).provider(:default)) do
-  desc "Uses Augeas API to update sysctl settings"
+raise('Missing augeasproviders_core dependency') if Puppet::Type.type(:augeasprovider).nil?
+Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeasprovider).provider(:default)) do
+  desc 'Uses Augeas API to update sysctl settings'
 
   default_file { '/etc/sysctl.conf' }
 
   lens { 'Sysctl.lns' }
 
-  optional_commands :sysctl => 'sysctl'
+  optional_commands sysctl: 'sysctl'
 
   resource_path do |resource|
     "$target/#{resource[:name]}"
   end
 
-  def self.sysctl_set(key, value, silent=false)
-    begin
-      if Facter.value(:kernel) == :openbsd
-        sysctl("#{key}=#{value}")
-      else
-        sysctl('-w', %Q{#{key}=#{value}})
-      end
-    rescue Puppet::ExecutionFailure => e
-      if silent
-        debug("augeasprovider_sysctl ignoring failed attempt to set #{key} due to :silent mode")
-      else
-        raise e
-      end
+  def self.sysctl_set(key, value, silent = false)
+    if Facter.value(:kernel) == :openbsd
+      sysctl("#{key}=#{value}")
+    else
+      sysctl('-w', %(#{key}=#{value}))
+    end
+  rescue Puppet::ExecutionFailure => e
+    if silent
+      debug("augeasprovider_sysctl ignoring failed attempt to set #{key} due to :silent mode")
+    else
+      raise e
     end
   end
 
@@ -37,7 +35,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
     sysctl('-n', key).chomp
   end
 
-  confine :feature => :augeas
+  confine feature: :augeas
 
   def self.instances(reference_resource = nil)
     return @resource_cache if @resource_cache
@@ -47,26 +45,26 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
     augopen(reference_resource) do |aug|
       resources ||= []
 
-      aug.match("$target/*").each do |spath|
+      aug.match('$target/*').each do |spath|
         resource = {
-          :ensure  => :present,
-          :persist => :true
+          ensure: :present,
+          persist: :true,
         }
 
-        basename = spath.split("/")[-1]
-        resource[:name] = basename.split("[")[0]
+        basename = spath.split('/')[-1]
+        resource[:name] = basename.split('[')[0]
         next unless resource[:name]
-        next if (resource[:name] == "#comment")
+        next if resource[:name] == '#comment'
 
-        resource[:value] = aug.get("#{spath}")
+        resource[:value] = aug.get(spath.to_s)
 
         # Only match comments immediately before the entry and prefixed with
         # the sysctl name
         cmtnode = aug.match("$target/#comment[following-sibling::*[1][self::#{basename}]]")
         unless cmtnode.empty?
           comment = aug.get(cmtnode[0])
-          if comment.match(/#{resource[:name]}:/)
-            resource[:comment] = comment.sub(/^#{resource[:name]}:\s*/, "")
+          if comment =~ %r{#{resource[:name]}:}
+            resource[:comment] = comment.sub(%r{^#{resource[:name]}:\s*}, '')
           end
         end
 
@@ -89,23 +87,23 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
 
       value = value.join(sep).strip
 
-      existing_index = resources.index{ |x| x[:name] == key }
+      existing_index = resources.index { |x| x[:name] == key }
 
       if existing_index
         resources[existing_index][:apply] = :true
       else
         resources << {
-          :name    => key,
-          :ensure  => :present,
-          :value   => value,
-          :apply   => :true,
-          :persist => :false
+          name: key,
+          ensure: :present,
+          value: value,
+          apply: :true,
+          persist: :false,
         }
       end
     end
 
     if resources
-      @resource_cache = resources.map{|x| x = new(x)}
+      @resource_cache = resources.map { |x| x = new(x) }
       return @resource_cache
     end
   end
@@ -140,7 +138,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
     end
   end
 
-  def valid_resource?(name)
+  def valid_resource?(_name)
     @property_hash.is_a?(Hash) && !@property_hash.empty? && (@property_hash[:apply] == :true)
   end
 
@@ -150,7 +148,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
     # This only matters when creating entries since invalid missing entries
     # might be used to clean up /etc/sysctl.conf
     if resource[:ensure] != :absent
-      if !valid_resource?(resource[:name])
+      unless valid_resource?(resource[:name])
         if resource[:silent] == :true
           debug("augeasproviders_sysctl: `#{resource[:name]}` is not a valid sysctl key")
           return true
@@ -172,7 +170,6 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
     end
   end
 
-
   define_aug_method!(:destroy) do |aug, resource|
     aug.rm("$target/#comment[following-sibling::*[1][self::#{resource[:name]}]][. =~ regexp('#{resource[:name]}:.*')]")
     aug.rm('$resource')
@@ -187,19 +184,19 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
         return resource[:val]
       end
     else
-      return self.class.sysctl_get(resource[:name])
+      self.class.sysctl_get(resource[:name])
     end
   end
 
-  attr_aug_accessor(:value, :label => :resource)
+  attr_aug_accessor(:value, label: :resource)
 
   alias_method :val, :value
   alias_method :val=, :value=
 
   define_aug_method(:comment) do |aug, resource|
     comment = aug.get("$target/#comment[following-sibling::*[1][self::#{resource[:name]}]][. =~ regexp('#{resource[:name]}:.*')]")
-    comment.sub!(/^#{resource[:name]}:\s*/, "") if comment
-    comment || ""
+    comment.sub!(%r{^#{resource[:name]}:\s*}, '') if comment
+    comment || ''
   end
 
   define_aug_method!(:comment=) do |aug, resource, value|
@@ -208,7 +205,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
       aug.rm(cmtnode)
     else
       if aug.match(cmtnode).empty?
-        aug.insert('$resource', "#comment", true)
+        aug.insert('$resource', '#comment', true)
       end
       aug.set("$target/#comment[following-sibling::*[1][self::#{resource[:name]}]]",
               "#{resource[:name]}: #{resource[:comment]}")
