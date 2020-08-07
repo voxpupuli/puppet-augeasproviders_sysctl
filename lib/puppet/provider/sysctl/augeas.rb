@@ -101,7 +101,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
 
     return unless resources
 
-    @resource_cache = resources.map { |x| x = new(x) }
+    @resource_cache = resources.map { |x| new(x) }
   end
 
   def self.prefetch(resources)
