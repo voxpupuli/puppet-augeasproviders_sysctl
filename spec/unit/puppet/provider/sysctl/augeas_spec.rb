@@ -21,8 +21,10 @@ describe provider_class do
   end
 
   # rubocop:disable RSpec/InstanceVariable
+  # rubocop:disable RSpec/BeforeAfterAll
   before(:all) { @tmpdir = Dir.mktmpdir }
   after(:all) { FileUtils.remove_entry_secure @tmpdir }
+  # rubocop:enable RSpec/BeforeAfterAll
 
   context 'with no existing file' do
     let(:target) { File.join(@tmpdir, 'new_file') }
