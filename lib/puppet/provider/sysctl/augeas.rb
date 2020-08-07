@@ -112,9 +112,8 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
     # We need to pass a reference resource so that the proper target is in
     # scope.
     instances(resources.first.last).each do |prov|
-      if resource = resources[prov.name]
-        resource.provider = prov
-      end
+      resource = resources[prov.name]
+      resource.provider = prov if resource
     end
   end
 
