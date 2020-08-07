@@ -24,11 +24,8 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
       sysctl('-w', %(#{key}=#{value}))
     end
   rescue Puppet::ExecutionFailure => e
-    if silent
-      debug("augeasprovider_sysctl ignoring failed attempt to set #{key} due to :silent mode")
-    else
-      raise e
-    end
+    raise e unless silent
+    debug("augeasprovider_sysctl ignoring failed attempt to set #{key} due to :silent mode")
   end
 
   def self.sysctl_get(key)
@@ -102,10 +99,9 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
       end
     end
 
-    if resources
-      @resource_cache = resources.map { |x| x = new(x) }
-      return @resource_cache
-    end
+    return unless resources
+
+    @resource_cache = resources.map { |x| x = new(x) }
   end
 
   def self.prefetch(resources)
