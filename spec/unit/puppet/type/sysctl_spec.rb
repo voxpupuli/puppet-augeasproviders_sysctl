@@ -1,5 +1,3 @@
-#!/usr/bin/env rspec
-
 require 'spec_helper'
 
 sysctl_type = Puppet::Type.type(:sysctl)
