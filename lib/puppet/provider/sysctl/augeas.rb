@@ -83,6 +83,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
     end
 
     sysctl('-a').each_line do |line|
+      line = line.force_encoding("US-ASCII").scrub("")
       value = line.split(sep)
 
       key = value.shift.strip
