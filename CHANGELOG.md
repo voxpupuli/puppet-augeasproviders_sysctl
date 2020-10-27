@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.1
+
+- Force data read from 'sysctl -a' into ASCSII (GH #46)
+
 ## 2.5.0
 
 - Add support for:
