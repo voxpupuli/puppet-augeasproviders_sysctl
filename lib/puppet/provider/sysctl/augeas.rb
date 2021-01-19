@@ -77,12 +77,14 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
     # Grab everything else
     resources ||= []
 
+    sysctl_all_args = '-a'
     sep = '='
+
     if Facter.value(:kernel) == 'FreeBSD'
-      sep = ':'
+      sysctl_all_args = '-aeW'
     end
 
-    sysctl('-a').each_line do |line|
+    sysctl(sysctl_all_args).each_line do |line|
       line = line.force_encoding("US-ASCII").scrub("")
       value = line.split(sep)
 
