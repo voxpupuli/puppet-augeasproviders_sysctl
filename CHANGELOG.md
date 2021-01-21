@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.0
+
+- FreeBSD: skip read-only MIB data (GH #48)
+
 ## 2.5.1
 
 - Force data read from 'sysctl -a' into ASCSII (GH #46)
