@@ -1,3 +1,13 @@
 ---
 .travis.yml:
-  forge_password: "AMqmhJcmD+R8cYvSY9rz2VAb8KDgxmnUO+hZb4HvKpM5Auf9oFibVpRWwwSerN75fFiiL8jn5Zwj5HhmyWr+lWr/x4wsHoQAGwJCoXTE40E+6Ick3DEi8rbvBYJIuBPrGcxW3PxH11uIAy27DBJ21Mp/OzIhKpTmVFv7sPrYr+c="
+  user: "herculesteam"
+  secure: "AMqmhJcmD+R8cYvSY9rz2VAb8KDgxmnUO+hZb4HvKpM5Auf9oFibVpRWwwSerN75fFiiL8jn5Zwj5HhmyWr+lWr/x4wsHoQAGwJCoXTE40E+6Ick3DEi8rbvBYJIuBPrGcxW3PxH11uIAy27DBJ21Mp/OzIhKpTmVFv7sPrYr+c="
+  before_install_pre:
+    - "travis_retry ./.travis.sh"
+  global_env:
+    - AUGEAS_LENS_LIB=lib/augeas/lenses:spec/fixtures/augeas/lenses
+Gemfile:
+  required:
+    ':development':
+      - gem: coveralls
+      - gem: ruby-augeas

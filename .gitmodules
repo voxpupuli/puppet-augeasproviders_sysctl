@@ -1,3 +1,6 @@
 [submodule "augeas"]
 	path = augeas
 	url = git://github.com/hercules-team/augeas.git
+[submodule "spec/fixtures/augeas"]
+	path = spec/fixtures/augeas
+	url = git://github.com/hercules-team/augeas.git
