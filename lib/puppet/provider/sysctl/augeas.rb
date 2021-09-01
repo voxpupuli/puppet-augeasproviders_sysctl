@@ -82,10 +82,13 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
         end
       end
 
-      sysctl_args = ['-e']
-
-      if Facter.value(:kernel) == 'FreeBSD'
+      if Facter.value(:kernel) == 'OpenBSD'
+        # OpenBSD doesn't support -e
+        sysctl_args = ['']
+      elsif Facter.value(:kernel) == 'FreeBSD'
         sysctl_args = '-ieW'
+      else
+        sysctl_args = ['-e']
       end
 
       # Split this into chunks so that we don't exceed command line limits
