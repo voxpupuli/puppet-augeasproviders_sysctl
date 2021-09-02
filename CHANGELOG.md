@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.1
+
+- Optimize provider resource creation during prefetch to reduce system load
+- Fix support for OpenBSD
+
 ## 2.6.0
 
 - FreeBSD: skip read-only MIB data (GH #48)
