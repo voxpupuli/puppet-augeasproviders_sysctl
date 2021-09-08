@@ -94,7 +94,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
         # OpenBSD doesn't support -e
         sysctl_args = ['']
       elsif Facter.value(:kernel) == 'FreeBSD'
-        sysctl_args = '-ieW'
+        sysctl_args = ['-ieW']
       else
         sysctl_args = ['-e']
       end
@@ -125,10 +125,10 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
         )
       end
 
-      sysctl_args = '-a'
+      sysctl_args = ['-a']
 
       if Facter.value(:kernel) == 'FreeBSD'
-        sysctl_args = '-aeW'
+        sysctl_args = ['-aeW']
       end
 
       sysctl_output = sysctl(sysctl_args)
