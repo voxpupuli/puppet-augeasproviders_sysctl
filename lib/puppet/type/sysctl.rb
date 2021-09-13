@@ -25,7 +25,7 @@ Puppet::Type.newtype(:sysctl) do
         end
 
         if _is_insync && (resource[:persist] == :true)
-            _is_insync = equal(should, is)
+          _is_insync = equal(should, is)
         end
       else
         # We won't get here unless exists? has been short circuited so we can

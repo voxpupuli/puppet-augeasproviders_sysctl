@@ -39,54 +39,62 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
 
   confine :feature => :augeas
 
-  def self.instances(reference_resources = nil)
-    return @resource_cache if @resource_cache
+  def self.collect_augeas_resources(res, entries, target='/etc/sysctl.conf', resources)
+    resources ||= []
 
-    resources = []
-    reference_resource_titles = reference_resources.map { |_ref_name, ref_obj| ref_obj.title }
+    augopen(res) do |aug|
+      entries.each do |entry|
+        next if resources.find{|x| x[:name] == entry}
 
-    sysctl_output = ''
-    if reference_resources
-      resource_dup = reference_resources.first.last.dup
-      files = (reference_resources.map { |_res_name, res_obj| res_obj[:target] } + ['/etc/sysctl.conf']).compact.uniq
+        value = aug.get("$target/#{entry}")
 
-      files.each do |file|
-        resource_dup[:target] = file
-        augopen(resource_dup) do |aug|
-          resources ||= []
+        if value
+          resource = {
+            :name    => entry,
+            :ensure  => :present,
+            :persist => :true,
+            :value   => value,
+            :target  => target
+          }
 
-          reference_resource_titles.each do |ref_title|
-            value = aug.get("$target/#{ref_title}")
-
-            if value
-              resource = {
-                :name    => ref_title,
-                :ensure  => :present,
-                :persist => :true,
-                :value   => value
-              }
-
-              # Only match comments immediately before the entry and prefixed with
-              # the sysctl name
-              cmtnode = aug.match("$target/#comment[following-sibling::*[1][self::#{ref_title}]]")
-              unless cmtnode.empty?
-                comment = aug.get(cmtnode[0])
-                if comment.match(/#{resource[:name]}:/)
-                  resource[:comment] = comment.sub(/^#{resource[:name]}:\s*/, "")
-                end
-              end
-
-              resources << resource
+          # Only match comments immediately before the entry and prefixed with
+          # the sysctl name
+          cmtnode = aug.match("$target/#comment[following-sibling::*[1][self::#{entry}]]")
+          unless cmtnode.empty?
+            comment = aug.get(cmtnode[0])
+            if comment.match(/#{resource[:name]}:/)
+              resource[:comment] = comment.sub(/^#{resource[:name]}:\s*/, "")
             end
           end
+
+          resources << resource
         end
       end
+    end
+
+    resources
+  end
+
+  def self.instances(reference_resources = nil)
+    resources = []
+    sysctl_output = ''
+
+    if reference_resources
+      reference_resource_titles = reference_resources.map { |_ref_name, ref_obj| ref_obj.title }
+      resource_dup = reference_resources.first.last.dup
+
+      collect_augeas_resources(
+        resource_dup,
+        reference_resource_titles,
+        resource_dup[:target],
+        resources
+      )
 
       if Facter.value(:kernel) == 'OpenBSD'
         # OpenBSD doesn't support -e
         sysctl_args = ['']
       elsif Facter.value(:kernel) == 'FreeBSD'
-        sysctl_args = '-ieW'
+        sysctl_args = ['-ieW']
       else
         sysctl_args = ['-e']
       end
@@ -98,10 +106,29 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
         sysctl_output += sysctl(sysctl_args.flatten)
       end
     else
-      sysctl_args = '-a'
+      Dir.glob(['/etc/sysctl.d/*.conf', '/etc/sysctl.conf']).reverse.each do |config_file|
+        tmp_res = Puppet::Resource.new('sysctl', 'ignored')
+        tmp_res[:target] = config_file
+
+        entries = []
+        augopen(tmp_res) do |aug|
+          entries = aug.match("$target/*")
+            .delete_if{|x| x.match?(/#comment/)}
+            .map{|x| x.split('/').last}
+        end
+
+        collect_augeas_resources(
+          tmp_res,
+          entries,
+          config_file,
+          resources
+        )
+      end
+
+      sysctl_args = ['-a']
 
       if Facter.value(:kernel) == 'FreeBSD'
-        sysctl_args = '-aeW'
+        sysctl_args = ['-aeW']
       end
 
       sysctl_output = sysctl(sysctl_args)
@@ -131,10 +158,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
       end
     end
 
-    if resources
-      @resource_cache = resources.map{|x| x = new(x)}
-      return @resource_cache
-    end
+    resources.map{|x| x = new(x)}
   end
 
   def self.prefetch(resources)
@@ -168,7 +192,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
   end
 
   def valid_resource?(name)
-    @property_hash.is_a?(Hash) && !@property_hash.empty? && (@property_hash[:apply] == :true)
+    @property_hash.is_a?(Hash) && @property_hash[:name] == name
   end
 
   def exists?

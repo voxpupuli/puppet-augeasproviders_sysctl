@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.2
+
+- Fix handling of entries with the 'target' specified
+- Fix bug in sysctl arguments on FreeBSD
+
 ## 2.6.1
 
 - Optimize provider resource creation during prefetch to reduce system load
