@@ -1,6 +1,6 @@
 {
   "name": "herculesteam-augeasproviders_sysctl",
-  "version": "2.6.1",
+  "version": "2.6.2",
   "author": "Raphael Pinson, Trevor Vaughan",
   "summary": "Augeas-based sysctl type and provider for Puppet",
   "license": "Apache-2.0",
@@ -11,7 +11,7 @@
   "dependencies": [
     {
       "name": "herculesteam/augeasproviders_core",
-      "version_requirement": ">=2.4.0 <4.0.0"
+      "version_requirement": ">= 2.4.0 < 4.0.0"
     }
   ],
   "operatingsystem_support": [
@@ -83,6 +83,6 @@
     }
   ],
   "requirements": [
-    { "name": "puppet", "version_requirement": ">= 5.0.0 < 7.0.0" }
+    { "name": "puppet", "version_requirement": ">= 5.0.0 < 8.0.0" }
   ]
 }

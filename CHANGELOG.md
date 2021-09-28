@@ -2,6 +2,9 @@
 
 ## 2.6.2
 
+- Add support for augeasproviders_core 3
+- Add support for puppet 7
+- Fix OpenBSD support
 - Fix handling of entries with the 'target' specified
 - Fix bug in sysctl arguments on FreeBSD
 
