@@ -106,7 +106,10 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
         sysctl_output += sysctl(sysctl_args.flatten)
       end
     else
-      Dir.glob(['/etc/sysctl.d/*.conf', '/etc/sysctl.conf']).reverse.each do |config_file|
+      targets=['/etc/sysctl.d/*.conf', '/etc/sysctl.conf']
+      targets = [target] if target
+
+      Dir.glob(targets).reverse.each do |config_file|
         tmp_res = Puppet::Resource.new('sysctl', 'ignored')
         tmp_res[:target] = config_file
 
@@ -148,13 +151,17 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
       if existing_index
         resources[existing_index][:apply] = :true
       else
-        resources << {
+        newres = {
           :name    => key,
           :ensure  => :present,
           :value   => value,
           :apply   => :true,
           :persist => :false
         }
+
+        newres[:target] = target if target
+
+        resources << newres
       end
     end
 
