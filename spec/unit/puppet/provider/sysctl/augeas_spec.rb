@@ -440,8 +440,8 @@ describe provider_class do
         ))
 
         aug_open(target, "Sysctl.lns") do |aug|
-          aug.get("net.ipv4.ip_forward").should eq "0"
-          aug.get("#comment[4]").should eq "Controls IP packet forwarding"
+          expect(aug.get("net.ipv4.ip_forward")).to eq("0")
+          expect(aug.get("#comment[4]")).to eq("Controls IP packet forwarding")
         end
 
         expect(@logs.first).to be_nil
