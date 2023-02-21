@@ -485,7 +485,7 @@ describe provider_class do
 
     it "should fail to load" do
       expect {
-        apply(Puppet::Type.type(:sysctl).new(
+        apply!(Puppet::Type.type(:sysctl).new(
           :name     => "net.ipv4.ip_forward",
           :value    => "1",
           :target   => target,
