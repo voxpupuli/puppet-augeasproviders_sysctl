@@ -1,3 +1,15 @@
 ---
-.travis.yml:
-  forge_password: "AMqmhJcmD+R8cYvSY9rz2VAb8KDgxmnUO+hZb4HvKpM5Auf9oFibVpRWwwSerN75fFiiL8jn5Zwj5HhmyWr+lWr/x4wsHoQAGwJCoXTE40E+6Ick3DEi8rbvBYJIuBPrGcxW3PxH11uIAy27DBJ21Mp/OzIhKpTmVFv7sPrYr+c="
+.github/workflows/ci.yml:
+  additional_packages: libaugeas-dev augeas-tools
+  rubocop: false
+Gemfile:
+  optional:
+    ':test':
+      - gem: ruby-augeas
+spec/spec_helper.rb:
+  spec_overrides:
+    - "require 'augeas_spec'"
+    - "# augeasproviders: setting $LOAD_PATH to work around broken type autoloading"
+    - "$LOAD_PATH.unshift(File.join(__dir__, 'fixtures/modules/augeasproviders_core/lib'))"
+spec/spec_helper_acceptance.rb:
+  unmanaged: false

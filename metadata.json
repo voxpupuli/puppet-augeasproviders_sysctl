@@ -1,16 +1,16 @@
 {
-  "name": "herculesteam-augeasproviders_sysctl",
+  "name": "puppet-augeasproviders_sysctl",
   "version": "2.6.2",
   "author": "Raphael Pinson, Trevor Vaughan",
   "summary": "Augeas-based sysctl type and provider for Puppet",
   "license": "Apache-2.0",
-  "source": "https://github.com/hercules-team/augeasproviders_sysctl",
-  "project_page": "https://github.com/hercules-team/augeasproviders_sysctl",
-  "issues_url": "https://github.com/hercules-team/augeasproviders_sysctl/issues",
+  "source": "https://github.com/voxpupuli/puppet-augeasproviders_sysctl",
+  "project_page": "https://github.com/voxpupuli/puppet-augeasproviders_sysctl",
+  "issues_url": "https://github.com/voxpupuli/puppet-augeasproviders_sysctl/issues",
   "description": "This module provides type/provider for sysctl using the Augeas configuration API library.",
   "dependencies": [
     {
-      "name": "herculesteam/augeasproviders_core",
+      "name": "puppet/augeasproviders_core",
       "version_requirement": ">= 2.4.0 < 4.0.0"
     }
   ],
@@ -18,25 +18,21 @@
     {
       "operatingsystem": "Debian",
       "operatingsystemrelease": [
-        "7",
-        "8",
-        "9",
-        "10"
+        "10",
+        "11"
       ]
     },
     {
       "operatingsystem": "Ubuntu",
       "operatingsystemrelease": [
-        "14.04",
-        "16.04",
         "18.04",
-        "18.10"
+        "20.04",
+        "22.04"
       ]
     },
     {
       "operatingsystem": "RedHat",
       "operatingsystemrelease": [
-        "6",
         "7",
         "8"
       ]
@@ -44,7 +40,6 @@
     {
       "operatingsystem": "CentOS",
       "operatingsystemrelease": [
-        "6",
         "7",
         "8"
       ]
@@ -52,7 +47,6 @@
     {
       "operatingsystem": "OracleLinux",
       "operatingsystemrelease": [
-        "6",
         "7",
         "8"
       ]
@@ -83,6 +77,6 @@
     }
   ],
   "requirements": [
-    { "name": "puppet", "version_requirement": ">= 5.0.0 < 8.0.0" }
+    { "name": "puppet", "version_requirement": ">= 6.1.0 < 8.0.0" }
   ]
 }
