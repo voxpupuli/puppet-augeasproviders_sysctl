@@ -132,7 +132,7 @@ describe 'Sysctl Tests' do
           end
 
           it 'should not be in /etc/sysctl.conf' do
-            expect(file_content_on(host, '/etc/sysctl.conf')).not_to match(/kernel\.pty\.max/)
+            expect(file_contents_on(host, '/etc/sysctl.conf')).not_to match(/kernel\.pty\.max/)
           end
         end
 
@@ -158,7 +158,7 @@ describe 'Sysctl Tests' do
           end
 
           it 'should be in /etc/sysctl.conf' do
-            expect(file_content_on(host, '/etc/sysctl.conf')).to match(/kernel\.pty\.max = 4098/)
+            expect(file_contents_on(host, '/etc/sysctl.conf')).to match(/kernel\.pty\.max = 4098/)
           end
 
           it 'should not be changed on the running system' do
@@ -186,7 +186,7 @@ describe 'Sysctl Tests' do
           end
 
           it 'should not be in /etc/sysctl.conf' do
-            expect(file_content_on(host, '/etc/sysctl.conf')).not_to match(/kernel\.pty\.max/)
+            expect(file_contents_on(host, '/etc/sysctl.conf')).not_to match(/kernel\.pty\.max/)
           end
 
           it 'should not be changed on the running system' do
@@ -219,10 +219,10 @@ describe 'Sysctl Tests' do
           end
 
           it 'should have correct file contents' do
-            expect(file_content_on(host, '/etc/sysctl.conf')).to match(/fs\.nr_open = 100002/)
-            expect(file_content_on(host, '/etc/sysctl.conf')).not_to match(/fs\.inotify\.max_user_watches/)
-            expect(file_content_on(host, '/etc/sysctl.d/20-fs.conf')).to match(/fs\.nr_open = 100001/)
-            expect(file_content_on(host, '/etc/sysctl.d/20-fs.conf')).to match(/fs\.inotify\.max_user_watches = 8193/)
+            expect(file_contents_on(host, '/etc/sysctl.conf')).to match(/fs\.nr_open = 100002/)
+            expect(file_contents_on(host, '/etc/sysctl.conf')).not_to match(/fs\.inotify\.max_user_watches/)
+            expect(file_contents_on(host, '/etc/sysctl.d/20-fs.conf')).to match(/fs\.nr_open = 100001/)
+            expect(file_contents_on(host, '/etc/sysctl.d/20-fs.conf')).to match(/fs\.inotify\.max_user_watches = 8193/)
           end
 
           context 'when deleting an entry' do
@@ -245,7 +245,7 @@ describe 'Sysctl Tests' do
             end
 
             it 'should have been removed from the system' do
-              expect(file_content_on(host, '/etc/sysctl.d/20-fs.conf')).not_to match(/fs\.inotify\.max_user_watches/)
+              expect(file_contents_on(host, '/etc/sysctl.d/20-fs.conf')).not_to match(/fs\.inotify\.max_user_watches/)
             end
           end
         end
