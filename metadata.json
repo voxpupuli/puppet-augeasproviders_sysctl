@@ -1,6 +1,6 @@
 {
   "name": "puppet-augeasproviders_sysctl",
-  "version": "3.0.0-rc0",
+  "version": "3.0.0",
   "author": "Raphael Pinson, Trevor Vaughan",
   "summary": "Augeas-based sysctl type and provider for Puppet",
   "license": "Apache-2.0",
