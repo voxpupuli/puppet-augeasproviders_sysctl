@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v3.1.0](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/tree/v3.1.0) (2023-06-22)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/compare/v3.0.0...v3.1.0)
+
+**Implemented enhancements:**
+
+- Add puppet 8 support [\#77](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/pull/77) ([bastelfreak](https://github.com/bastelfreak))
+
 ## [v3.0.0](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/tree/v3.0.0) (2023-04-28)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/compare/2.6.2...v3.0.0)
