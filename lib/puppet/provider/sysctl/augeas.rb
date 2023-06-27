@@ -189,9 +189,6 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
       value = resource[:value] || resource[:val]
 
       augopen! do |aug|
-        # Prefer to create the node next to a commented out entry
-        commented = aug.match("$target/#comment[.=~regexp('#{resource[:name]}([^a-z\.].*)?')]")
-        aug.insert(commented.first, resource[:name], false) unless commented.empty?
         aug.set(resource_path, value)
         setvars(aug)
       end
