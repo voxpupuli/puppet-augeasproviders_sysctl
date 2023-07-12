@@ -14,7 +14,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
   optional_commands :sysctl => 'sysctl'
 
   resource_path do |resource|
-    "$target/#{resource[:name].gsub('/', '\/')}"
+    "$target/#{resource[:name]&.gsub('/', '\/')}"
   end
 
   def self.sysctl_set(key, value, silent=false)
@@ -62,8 +62,8 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
           cmtnode = aug.match("$target/#comment[following-sibling::*[1][self::#{entry.gsub('/', '\/')}]]")
           unless cmtnode.empty?
             comment = aug.get(cmtnode[0])
-            if comment.match(/#{resource[:name].gsub('/', '\/')}:/)
-              resource[:comment] = comment.sub(/^#{resource[:name].gsub('/', '\/')}:\s*/, "")
+            if comment.match(/#{resource[:name]&.gsub('/', '\/')}:/)
+              resource[:comment] = comment.sub(/^#{resource[:name]&.gsub('/', '\/')}:\s*/, "")
             end
           end
 
@@ -268,7 +268,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, :parent => Puppet::Type.type(:augeas
       if aug.match(cmtnode).empty?
         aug.insert('$resource', "#comment", true)
       end
-      aug.set("$target/#comment[following-sibling::*[1][self::#{resource[:name].gsub('/', '\/')}]]",
+      aug.set("$target/#comment[following-sibling::*[1][self::#{resource[:name]&.gsub('/', '\/')}]]",
               "#{resource[:name]}: #{resource[:comment]}")
     end
   end
