@@ -1,7 +1,8 @@
 ---
 .github/workflows/ci.yml:
-  additional_packages: libaugeas-dev augeas-tools
-  rubocop: false
+  with:
+    additional_packages: libaugeas-dev augeas-tools
+    rubocop: false
 Gemfile:
   optional:
     ':test':
