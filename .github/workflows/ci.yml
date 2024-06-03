@@ -20,6 +20,5 @@ jobs:
     name: Puppet
     uses: voxpupuli/gha-puppet/.github/workflows/beaker.yml@v2
     with:
-      pidfile_workaround: 'false'
       additional_packages: 'libaugeas-dev augeas-tools'
       rubocop: false
