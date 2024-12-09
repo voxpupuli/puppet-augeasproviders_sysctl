@@ -198,6 +198,12 @@ describe 'Sysctl Tests' do
         context 'when using a target file' do
           let(:manifest) do
             <<-EOM
+              if $facts['os']['family'] == 'RedHat' and versioncmp($facts['os']['release']['major'], '9') >= 0 {
+                package { 'systemd-udev':
+                  ensure => 'installed',
+                }
+                Package['systemd-udev'] -> Sysctl <| |>
+              }
               sysctl { 'fs.nr_open':
                 value  => '100001',
                 target => '/etc/sysctl.d/20-fs.conf'
