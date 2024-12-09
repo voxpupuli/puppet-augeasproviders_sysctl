@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v3.3.0](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/tree/v3.3.0) (2024-12-09)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/compare/v3.2.0...v3.3.0)
+
+**Implemented enhancements:**
+
+- Support EL9 [\#99](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/pull/99) ([treydock](https://github.com/treydock))
+- add support for Ubuntu 24.04 [\#98](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/pull/98) ([techsk8](https://github.com/techsk8))
+
 ## [v3.2.0](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/tree/v3.2.0) (2023-10-30)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/compare/v3.1.0...v3.2.0)
