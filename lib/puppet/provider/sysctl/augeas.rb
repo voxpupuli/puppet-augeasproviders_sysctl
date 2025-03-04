@@ -15,7 +15,11 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
   optional_commands sysctl: 'sysctl'
 
   resource_path do |resource|
-    "$target/#{resource[:name]}"
+    "$target/#{resource[:name].to_s.gsub('/','\/')}"
+  end
+
+  def escaped_resource_name
+    resource[:name].to_s.gsub('/','\/')
   end
 
   def self.sysctl_set(key, value, silent = false)
