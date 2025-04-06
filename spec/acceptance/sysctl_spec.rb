@@ -195,6 +195,29 @@ describe 'Sysctl Tests' do
           end
         end
 
+        context 'when entry name contains a slash' do
+          let(:manifest) do
+            <<-EOM
+              sysctl { 'net.ipv4.conf.vrrp/1.accept_local':
+                value => 1,
+                apply => false,
+              }
+            EOM
+          end
+
+          it 'works with no errors' do
+            apply_manifest_on(host, manifest, catch_failures: true)
+          end
+
+          it 'is idempotent' do
+            apply_manifest_on(host, manifest, { catch_changes: true })
+          end
+
+          it 'has been removed from the system' do
+            expect(file_contents_on(host, '/etc/sysctl.conf')).to match(%r{net\.ipv4\.conf\.vrrp\/1\.accept_local = 1})
+          end
+        end
+
         context 'when using a target file' do
           let(:manifest) do
             <<-EOM
