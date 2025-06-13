@@ -23,6 +23,7 @@ if File.exist?(File.join(__dir__, 'default_module_facts.yml'))
 end
 
 require 'augeas_spec'
+require 'fixtures/modules/augeasproviders_core/spec/support/spec/psh_fixtures'
 
 # augeasproviders: setting $LOAD_PATH to work around broken type autoloading
 
