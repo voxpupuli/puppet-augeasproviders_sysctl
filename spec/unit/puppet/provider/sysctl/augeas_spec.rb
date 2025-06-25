@@ -26,6 +26,28 @@ describe provider_class do
   before(:all) { @tmpdir = Dir.mktmpdir }
   after(:all) { FileUtils.remove_entry_secure @tmpdir }
 
+  context 'with slash in name' do
+
+    before do
+      expect(provider_class).to receive(:sysctl).with(['-e', 'net.ipv4.conf.vrrp/1.accept_local']).and_return('net.ipv4.conf.vrrp/1.accept_local=0')
+      expect(provider_class).to receive(:sysctl).with('-w', 'net.ipv4.conf.vrrp/1.accept_local=1')
+      expect(provider_class).to receive(:sysctl).with('-n', 'net.ipv4.conf.vrrp/1.accept_local').at_least(:once).and_return('1')
+      expect(provider_class).to receive(:sysctl).with(['-e', 'net.ipv4.conf.vrrp/1.accept_local']).and_return('net.ipv4.conf.vrrp/1.accept_local=1')
+    end
+
+    it 'creates simple new entry' do
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.ipv4.conf.vrrp/1.accept_local',
+               value: '1',
+               provider: 'augeas'
+             ))
+
+      augparse(target, 'Sysctl.lns', '
+        { "net.ipv4.conf.vrrp/1.accept_local" = "1" }
+      ')
+    end
+  end
+
   context 'with no existing file' do
     let(:target) { File.join(@tmpdir, 'new_file') }
 
