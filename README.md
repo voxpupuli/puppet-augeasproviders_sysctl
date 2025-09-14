@@ -33,6 +33,7 @@ See [Puppet/Augeas pre-requisites](http://docs.puppetlabs.com/guides/augeas.html
 Type documentation can be generated with `puppet doc -r type` or viewed on the
 [Puppet Forge page](http://forge.puppetlabs.com/puppet/augeasproviders_sysctl).
 
+By default, `sysctl` settings are both applied to the running kernel configuration (via `sysctl -w`) and persisted to disk. See the `apply` and `persist` parameters to change this behavior.
 
 ### manage simple entry
 
