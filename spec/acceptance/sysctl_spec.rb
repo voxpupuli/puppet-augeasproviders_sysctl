@@ -255,6 +255,84 @@ describe 'Sysctl Tests' do
           end
         end
       end
+
+      context 'with values in files' do
+        let(:manifest) do
+          <<-EOM
+            sysctl { 'fs.nr_open':
+              value => '100000',
+              target => '/etc/sysctl.d/10-fs.conf'
+            }
+          EOM
+        end
+
+        it 'works with no errors' do
+          apply_manifest_on(host, manifest, catch_failures: true)
+        end
+
+        it 'is idempotent' do
+          apply_manifest_on(host, manifest, { catch_changes: true })
+        end
+
+        it 'has correct file contents' do
+          expect(file_contents_on(host, '/etc/sysctl.d/10-fs.conf')).to match(%r{fs\.nr_open = 100000})
+        end
+
+        context 'when changing value' do
+          let(:manifest) do
+            <<-EOM
+              sysctl { 'fs.nr_open':
+                value => '100001',
+                target => '/etc/sysctl.d/10-fs.conf'
+              }
+            EOM
+          end
+
+          it 'works with no errors' do
+            apply_manifest_on(host, manifest, catch_failures: true)
+          end
+
+          it 'is idempotent' do
+            apply_manifest_on(host, manifest, { catch_changes: true })
+          end
+
+          it 'has correct file contents' do
+            expect(file_contents_on(host, '/etc/sysctl.d/10-fs.conf')).to match(%r{fs\.nr_open = 100001})
+          end
+        end
+      end
+
+      context 'with values in separate files' do
+        context 'when changing value' do
+          it 'applies twice with no errors' do
+            # Workaround for https://github.com/voxpupuli/puppet-augeasproviders_sysctl/issues/89
+            pp = <<-EOS
+            sysctl { 'kernel.sched_autogroup_enabled':
+              ensure  => present,
+              value   => '0',
+              target  => '/etc/sysctl.d/98-sched_autogroup_enabled.conf',
+              comment => 'Disable sched autogroup',
+            }
+            EOS
+            apply_manifest(pp, catch_failures: true)
+
+            pp2 = <<-EOS
+            sysctl { 'kernel.sched_autogroup_enabled':
+              ensure  => present,
+              value   => '1',
+              target  => '/etc/sysctl.d/98-sched_autogroup_enabled.conf',
+              comment => 'Enable sched autogroup',
+            }
+            EOS
+            apply_manifest(pp2, catch_changes: true)
+          end
+
+          describe file('/etc/sysctl.d/98-sched_autogroup_enabled.conf') do
+            it { is_expected.to be_file }
+            its(:content) { is_expected.to match %r{kernel.sched_autogroup_enabled = 1} }
+          end
+        end
+      end
     end
   end
 end
