@@ -26,3 +26,4 @@ jobs:
     with:
       additional_packages: 'libaugeas-dev augeas-tools'
       rubocop: false
+      beaker_hypervisor: 'docker'
