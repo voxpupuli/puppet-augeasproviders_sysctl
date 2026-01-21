@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v4.0.0](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/tree/v4.0.0) (2026-01-21)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/compare/v3.3.0...v4.0.0)
+
+**Breaking changes:**
+
+- Drop puppet, update openvox minimum version to 8.19 [\#105](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/pull/105) ([TheMeier](https://github.com/TheMeier))
+
+**Implemented enhancements:**
+
+- Generate the REFERENCE file [\#109](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/pull/109) ([bwitt](https://github.com/bwitt))
+- Add Debian 13 support [\#107](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/pull/107) ([bastelfreak](https://github.com/bastelfreak))
+- metadata.json: Add OpenVox [\#102](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/pull/102) ([jstraw](https://github.com/jstraw))
+
+**Fixed bugs:**
+
+- Use correct default file for Debian 13 and above [\#117](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/pull/117) ([sagepe](https://github.com/sagepe))
+
+**Merged pull requests:**
+
+- \[doc\] Make it clear the default is to apply [\#111](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/pull/111) ([bwitt](https://github.com/bwitt))
+
 ## [v3.3.0](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/tree/v3.3.0) (2024-12-09)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-augeasproviders_sysctl/compare/v3.2.0...v3.3.0)
