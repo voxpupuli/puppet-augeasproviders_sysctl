@@ -8,7 +8,13 @@ raise('Missing augeasproviders_core dependency') if Puppet::Type.type(:augeaspro
 Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeasprovider).provider(:default)) do
   desc 'Uses Augeas API to update sysctl settings'
 
-  default_file { '/etc/sysctl.conf' }
+  default_file do
+    if Facter.value(:os)['name'] == 'Debian' && Facter.value(:os)['release']['major'].to_i >= 13
+      '/etc/sysctl.d/99-puppet.conf'
+    else
+      '/etc/sysctl.conf'
+    end
+  end
 
   lens { 'Sysctl.lns' }
 
