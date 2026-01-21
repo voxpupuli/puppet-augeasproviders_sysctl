@@ -5,6 +5,13 @@ test_name 'Augeasproviders Sysctl'
 describe 'Sysctl Tests' do
   hosts.each do |host|
     context "on #{host}" do
+      let(:sysctl_conf) do
+        if fact_on(host, 'os.name') == 'Debian' && (fact_on(host, 'os.release.major') || '0').to_i >= 13
+          '/etc/sysctl.d/99-puppet.conf'
+        else
+          '/etc/sysctl.conf'
+        end
+      end
       context 'file based updates' do
         let(:manifest) do
           <<-EOM
@@ -28,7 +35,7 @@ describe 'Sysctl Tests' do
           result = on(host, 'sysctl -n fs.nr_open').stdout.strip
           expect(result).not_to eql('100000')
 
-          on(host, 'sysctl -p', accept_all_exit_codes: true)
+          on(host, "sysctl -p #{sysctl_conf}", accept_all_exit_codes: true)
           result = on(host, 'sysctl -n fs.nr_open').stdout.strip
           expect(result).to eql('100000')
         end
@@ -131,8 +138,8 @@ describe 'Sysctl Tests' do
             apply_manifest_on(host, manifest, { catch_changes: true })
           end
 
-          it 'is not in /etc/sysctl.conf' do
-            expect(file_contents_on(host, '/etc/sysctl.conf')).not_to match(%r{kernel\.pty\.max})
+          it 'is not in default config file' do
+            expect(file_contents_on(host, sysctl_conf)).not_to match(%r{kernel\.pty\.max})
           end
         end
 
@@ -157,8 +164,8 @@ describe 'Sysctl Tests' do
             apply_manifest_on(host, manifest, { catch_changes: true })
           end
 
-          it 'is in /etc/sysctl.conf' do
-            expect(file_contents_on(host, '/etc/sysctl.conf')).to match(%r{kernel\.pty\.max = 4098})
+          it 'is in default config file' do
+            expect(file_contents_on(host, sysctl_conf)).to match(%r{kernel\.pty\.max = 4098})
           end
 
           it 'is not changed on the running system' do
@@ -185,8 +192,8 @@ describe 'Sysctl Tests' do
             apply_manifest_on(host, manifest, { catch_changes: true })
           end
 
-          it 'is not in /etc/sysctl.conf' do
-            expect(file_contents_on(host, '/etc/sysctl.conf')).not_to match(%r{kernel\.pty\.max})
+          it 'is not in default config file' do
+            expect(file_contents_on(host, sysctl_conf)).not_to match(%r{kernel\.pty\.max})
           end
 
           it 'is not changed on the running system' do
@@ -225,8 +232,8 @@ describe 'Sysctl Tests' do
           end
 
           it 'has correct file contents' do
-            expect(file_contents_on(host, '/etc/sysctl.conf')).to match(%r{fs\.nr_open = 100002})
-            expect(file_contents_on(host, '/etc/sysctl.conf')).not_to match(%r{fs\.inotify\.max_user_watches})
+            expect(file_contents_on(host, sysctl_conf)).to match(%r{fs\.nr_open = 100002})
+            expect(file_contents_on(host, sysctl_conf)).not_to match(%r{fs\.inotify\.max_user_watches})
             expect(file_contents_on(host, '/etc/sysctl.d/20-fs.conf')).to match(%r{fs\.nr_open = 100001})
             expect(file_contents_on(host, '/etc/sysctl.d/20-fs.conf')).to match(%r{fs\.inotify\.max_user_watches = 8193})
           end
