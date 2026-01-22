@@ -1,6 +1,6 @@
 {
   "name": "puppet-augeasproviders_sysctl",
-  "version": "4.0.0",
+  "version": "4.0.1-rc0",
   "author": "Vox Pupuli",
   "summary": "Augeas-based sysctl type and provider for Puppet",
   "license": "Apache-2.0",
