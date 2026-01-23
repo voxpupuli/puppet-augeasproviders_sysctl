@@ -42,7 +42,8 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
 
   confine feature: :augeas
 
-  def self.collect_augeas_resources(res, entries, target = '/etc/sysctl.conf', resources)
+  def self.collect_augeas_resources(res, entries, tgt, resources)
+    tgt ||= target
     resources ||= []
 
     augopen(res) do |aug|
@@ -58,7 +59,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
           ensure: :present,
           persist: :true,
           value: value,
-          target: target
+          target: tgt
         }
 
         # Only match comments immediately before the entry and prefixed with
@@ -82,14 +83,26 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
 
     if reference_resources
       reference_resource_titles = reference_resources.map { |_ref_name, ref_obj| ref_obj.title }
-      resource_dup = reference_resources.first.last.dup
 
-      collect_augeas_resources(
-        resource_dup,
-        reference_resource_titles,
-        resource_dup[:target],
-        resources
-      )
+      # Get all resources with their targets
+      resources_by_target = {}
+      reference_resources.each do |_ref_name, ref_obj|
+        tgt = ref_obj[:target] || target
+        resources_by_target[tgt] ||= []
+        resources_by_target[tgt] << ref_obj.title
+      end
+
+      # Now collect resources from each target
+      resources_by_target.each do |target, res_titles|
+        tmp_res = Puppet::Resource.new('sysctl', 'ignored')
+        tmp_res[:target] = target
+        collect_augeas_resources(
+          tmp_res,
+          res_titles,
+          target,
+          resources
+        )
+      end
 
       sysctl_args = if Facter.value(:kernel) == 'OpenBSD'
                       # OpenBSD doesn't support -e
@@ -107,7 +120,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
         sysctl_output += sysctl(sysctl_args.flatten)
       end
     else
-      targets = ['/etc/sysctl.d/*.conf', '/etc/sysctl.conf']
+      targets = ['/etc/sysctl.d/*.conf', target]
       targets = [target] if target
 
       Dir.glob(targets).reverse.each do |config_file|
