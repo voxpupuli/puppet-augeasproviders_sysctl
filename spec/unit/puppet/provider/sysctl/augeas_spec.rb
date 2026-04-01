@@ -492,4 +492,54 @@ describe provider_class do
       end.to raise_error(%r{target})
     end
   end
+
+  context 'duplicate entry prevention' do
+    let(:tmptarget) { aug_fixture('empty') }
+    let(:target) { tmptarget.path }
+
+    it 'does not create duplicate entries when changing value and comment' do
+      # Mock sysctl calls
+      allow(described_class).to receive(:sysctl).with(['-a']).and_return('')
+      allow(described_class).to receive(:sysctl).with(['-e', 'kernel.sched_autogroup_enabled']).and_return('kernel.sched_autogroup_enabled = 0')
+
+      # First apply - create the entry
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'kernel.sched_autogroup_enabled',
+               value: '0',
+               target: target,
+               comment: 'initial comment',
+               apply: false,
+               silent: true,
+               provider: 'augeas'
+             ))
+
+      # Verify initial state
+      content = File.read(target)
+      expect(content).to match(%r{kernel\.sched_autogroup_enabled = 0})
+      expect(content).to match(%r{kernel\.sched_autogroup_enabled: initial comment})
+
+      # Mock sysctl for the second run
+      allow(described_class).to receive(:sysctl).with(['-e', 'kernel.sched_autogroup_enabled']).and_return('kernel.sched_autogroup_enabled = 1')
+
+      # Second apply - change value and comment
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'kernel.sched_autogroup_enabled',
+               value: '1',
+               target: target,
+               comment: 'updated comment',
+               apply: false,
+               silent: true,
+               provider: 'augeas'
+             ))
+
+      # Verify no duplicates exist
+      content = File.read(target)
+      occurrences = content.scan(%r{kernel\.sched_autogroup_enabled}).length
+      expect(occurrences).to eq(2) # One for the value line, one for the comment line
+      expect(content).to match(%r{kernel\.sched_autogroup_enabled = 1})
+      expect(content).to match(%r{kernel\.sched_autogroup_enabled: updated comment})
+      expect(content).not_to match(%r{kernel\.sched_autogroup_enabled = 0})
+      expect(content).not_to match(%r{initial comment})
+    end
+  end
 end

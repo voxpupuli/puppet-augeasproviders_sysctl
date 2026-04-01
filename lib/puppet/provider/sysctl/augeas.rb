@@ -252,7 +252,8 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
     if value.empty?
       aug.rm(cmtnode)
     else
-      aug.insert('$resource', '#comment', true) if aug.match(cmtnode).empty?
+      aug.rm(cmtnode)
+      aug.insert('$resource', '#comment', true)
       aug.set("$target/#comment[following-sibling::*[1][self::#{resource[:name]}]]",
               "#{resource[:name]}: #{resource[:comment]}")
     end
@@ -272,11 +273,34 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
 
       # Ensures that we only save to disk when we're supposed to
       if resource[:persist] == :true
-        # Create the entry on disk if it's not already there
-        create if @property_hash[:persist] == :false
+        # Only create the entry if it doesn't exist in the Augeas tree yet
+        # This prevents duplicates when transitioning from non-persistent to persistent
+        if @property_hash[:persist] == :false && resource[:ensure] != :absent
+          augopen! do |aug|
+            # Only create if the entry doesn't already exist in the target
+            create unless aug.match(resource_path).any?
+          end
+        end
 
         super
       end
+    end
+  end
+
+  private
+
+  def augsave
+    augsave! do
+      # In case we are creating a new file, we need to make sure we are not
+      # saving anything to the main sysctl file, which would be the case if
+      # the lens matched entries in both files.
+      if resource.original_parameters[:target] != 'newfile' && resource[:target]
+        aug.set('$target', resource[:target])
+        aug.rm('$target/error')
+      end
+
+      augsave!
+      FileUtils.rm_f(resource[:target]) if File.exist?(resource[:target]) && File.read(resource[:target]).empty?
     end
   end
 end
