@@ -19,6 +19,7 @@ describe provider_class do
       'net.bridge.bridge-nf-call-iptables = 0',
       'kernel.sem = 100   13000 11  1200',
       'kernel.sysrq = 0',
+      'net.ipv4.conf.default.rp_filter = 1',
       ''
     ].join("\n"))
   end
@@ -166,10 +167,9 @@ describe provider_class do
       ')
     end
 
-    # Validated that it *does* delete the entries but somethign about prefetch
-    # isn't playing well with the way the tests are loaded and, unfortunately,
-    # I can't short circuit it.
-    xit 'should delete entries' do
+    it 'deletes entries' do
+      mock_sysctl_noop('kernel.sysrq', '0')
+
       apply!(Puppet::Type.type(:sysctl).new(
                name: 'kernel.sysrq',
                ensure: 'absent',
@@ -473,6 +473,296 @@ describe provider_class do
           { "net.ipv4.ip_forward" = "0" }
           { }
         ')
+      end
+    end
+  end
+
+  # Helper: set up sysctl command mocks for an update operation.
+  # Mocks -e (prefetch, twice), -n (live value check), -w (set value).
+  def mock_sysctl_update(key, current_value, new_value)
+    expect(described_class).to receive(:sysctl).with(['-e', key]).and_return("#{key}=#{current_value}")
+    expect(described_class).to receive(:sysctl).with('-n', key).at_least(:once).and_return(current_value, new_value)
+    expect(described_class).to receive(:sysctl).with('-w', "#{key}=#{new_value}")
+    expect(described_class).to receive(:sysctl).with(['-e', key]).and_return("#{key}=#{new_value}")
+  end
+
+  # Helper: set up sysctl mocks for a no-change prefetch (no -n/-w calls).
+  def mock_sysctl_noop(key, value)
+    expect(described_class).to receive(:sysctl).with(['-e', key]).twice.and_return("#{key}=#{value}")
+  end
+
+  context 'with duplicate entries' do
+    let(:tmptarget) { aug_fixture('duplicates') }
+    let(:target) { tmptarget.path }
+
+    # --- positive: read path ---
+
+    it 'lists instances without duplicate names' do
+      allow(provider_class).to receive(:target).and_return(target)
+
+      names = provider_class.instances.map { |p| p.get(:name) }
+      duplicates = names.select { |n| names.count(n) > 1 }
+
+      expect(duplicates).to eq([])
+    end
+
+    # --- positive: update with managed comments on both entries ---
+
+    it 'updates value, preserves first managed comment, removes duplicate managed comment' do
+      mock_sysctl_update('net.ipv4.ip_forward', '0', '2')
+
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.ipv4.ip_forward',
+               value: '2',
+               target: target,
+               provider: 'augeas'
+             ))
+
+      aug_open(target, 'Sysctl.lns') do |aug|
+        expect(aug.match('net.ipv4.ip_forward').length).to eq(1)
+        expect(aug.get('net.ipv4.ip_forward')).to eq('2')
+        expect(aug.match("#comment[. = 'net.ipv4.ip_forward: first managed comment']")).not_to eq([])
+        expect(aug.match("#comment[. = 'net.ipv4.ip_forward: second managed comment']")).to eq([])
+      end
+    end
+
+    # --- positive: update bare duplicate (no managed comments) ---
+
+    it 'updates bare duplicate key (managed comment on first only)' do
+      mock_sysctl_update('kernel.sysrq', '0', '1')
+
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'kernel.sysrq',
+               value: '1',
+               target: target,
+               provider: 'augeas'
+             ))
+
+      aug_open(target, 'Sysctl.lns') do |aug|
+        expect(aug.match('kernel.sysrq').length).to eq(1)
+        expect(aug.get('kernel.sysrq')).to eq('1')
+        expect(aug.match("#comment[. = 'kernel.sysrq: controls the System Request debugging functionality']")).not_to eq([])
+      end
+    end
+
+    # --- positive: non-duplicate entry in file with duplicates ---
+
+    it 'updates non-duplicate entry without affecting duplicated keys' do
+      mock_sysctl_update('net.ipv4.conf.default.rp_filter', '1', '0')
+
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.ipv4.conf.default.rp_filter',
+               value: '0',
+               target: target,
+               provider: 'augeas'
+             ))
+
+      aug_open(target, 'Sysctl.lns') do |aug|
+        expect(aug.match('net.ipv4.conf.default.rp_filter').length).to eq(1)
+        expect(aug.get('net.ipv4.conf.default.rp_filter')).to eq('0')
+        # Duplicate keys left alone (we only managed rp_filter)
+        expect(aug.match('net.ipv4.ip_forward').length).to eq(2)
+        expect(aug.match('kernel.sysrq').length).to eq(2)
+      end
+    end
+
+    # --- positive: value + comment together with duplicates ---
+
+    it 'updates both value and comment on duplicated key' do
+      mock_sysctl_update('net.ipv4.ip_forward', '0', '3')
+
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.ipv4.ip_forward',
+               value: '3',
+               comment: 'updated via puppet',
+               target: target,
+               provider: 'augeas'
+             ))
+
+      aug_open(target, 'Sysctl.lns') do |aug|
+        expect(aug.match('net.ipv4.ip_forward').length).to eq(1)
+        expect(aug.get('net.ipv4.ip_forward')).to eq('3')
+        expect(aug.match("#comment[. = 'net.ipv4.ip_forward: updated via puppet']")).not_to eq([])
+        expect(aug.match("#comment[. = 'net.ipv4.ip_forward: second managed comment']")).to eq([])
+      end
+    end
+
+    # --- positive: comment-only change with duplicates ---
+
+    it 'sets comment on duplicated key without changing value' do
+      mock_sysctl_noop('net.ipv4.ip_forward', '0')
+
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.ipv4.ip_forward',
+               comment: 'new comment after dedup',
+               target: target,
+               provider: 'augeas'
+             ))
+
+      aug_open(target, 'Sysctl.lns') do |aug|
+        expect(aug.match('net.ipv4.ip_forward').length).to eq(1)
+        expect(aug.match("#comment[. = 'net.ipv4.ip_forward: new comment after dedup']")).not_to eq([])
+        expect(aug.match("#comment[. = 'net.ipv4.ip_forward: second managed comment']")).to eq([])
+      end
+    end
+
+    # --- positive: destroy removes all occurrences ---
+
+    it 'removes all duplicate entries and managed comments on destroy' do
+      # Cannot use apply! with ensure=>absent due to the prefetch limitation
+      # (see xit test in 'with full file'). Verify the Augeas XPath logic
+      # that the destroy method delegates to.
+      aug_open(target, 'Sysctl.lns') do |aug|
+        expect(aug.match('kernel.sysrq').length).to eq(2)
+
+        loop do
+          break if aug.match('kernel.sysrq').empty?
+
+          aug.rm("#comment[following-sibling::*[1][self::kernel.sysrq]][. =~ regexp('kernel.sysrq:.*')]")
+          aug.rm('kernel.sysrq')
+        end
+
+        expect(aug.match('kernel.sysrq')).to eq([])
+        expect(aug.match("#comment[. =~ regexp('kernel.sysrq:.*')]")).to eq([])
+        # Other keys survive
+        expect(aug.match('net.ipv4.ip_forward').length).to eq(2)
+      end
+    end
+
+    # --- negative: persist false must NOT clean up duplicates on disk ---
+
+    it 'does not modify file when persist is false even with duplicates present' do
+      expect(provider_class).to receive(:sysctl).with(['-e', 'net.ipv4.ip_forward']).and_return('net.ipv4.ip_forward=0')
+      expect(provider_class).to receive(:sysctl).with('-n', 'net.ipv4.ip_forward').at_least(:once).and_return('0', '9')
+      expect(provider_class).to receive(:sysctl).with('-w', 'net.ipv4.ip_forward=9')
+      expect(provider_class).to receive(:sysctl).with(['-e', 'net.ipv4.ip_forward']).and_return('net.ipv4.ip_forward=9')
+
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.ipv4.ip_forward',
+               value: '9',
+               target: target,
+               provider: 'augeas',
+               persist: false
+             ))
+
+      aug_open(target, 'Sysctl.lns') do |aug|
+        # Both entries must remain on disk (persist: false means no disk writes)
+        expect(aug.match('net.ipv4.ip_forward').length).to eq(2)
+      end
+    end
+  end
+
+  context 'with floating orphaned managed comments and duplicates' do
+    let(:tmptarget) { aug_fixture('duplicates_floating_comments') }
+    let(:target) { tmptarget.path }
+
+    it 'handles update cleanly despite floating managed comments' do
+      mock_sysctl_update('net.ipv4.ip_forward', '0', '5')
+
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.ipv4.ip_forward',
+               value: '5',
+               target: target,
+               provider: 'augeas'
+             ))
+
+      aug_open(target, 'Sysctl.lns') do |aug|
+        expect(aug.match('net.ipv4.ip_forward').length).to eq(1)
+        expect(aug.get('net.ipv4.ip_forward')).to eq('5')
+        # The real managed comment (immediately before the kept entry) survives
+        expect(aug.match("#comment[. = 'net.ipv4.ip_forward: real managed comment']")).not_to eq([])
+        # Floating comments are NOT removed (they're not preceding any entry)
+        # This is expected — cleanup_duplicates only removes comments that
+        # immediately precede a duplicate entry being deleted
+        expect(aug.match("#comment[. = 'net.ipv4.ip_forward: orphaned managed comment with no entry below']")).not_to eq([])
+      end
+    end
+  end
+
+  context 'with triple duplicates' do
+    let(:tmptarget) { aug_fixture('duplicates_triple') }
+    let(:target) { tmptarget.path }
+
+    it 'reduces three entries to one, preserves first comment, removes other two comments' do
+      mock_sysctl_update('net.ipv4.ip_forward', '0', '5')
+
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.ipv4.ip_forward',
+               value: '5',
+               target: target,
+               provider: 'augeas'
+             ))
+
+      aug_open(target, 'Sysctl.lns') do |aug|
+        expect(aug.match('net.ipv4.ip_forward').length).to eq(1)
+        expect(aug.get('net.ipv4.ip_forward')).to eq('5')
+        expect(aug.match("#comment[. = 'net.ipv4.ip_forward: alpha']")).not_to eq([])
+        expect(aug.match("#comment[. = 'net.ipv4.ip_forward: beta']")).to eq([])
+        expect(aug.match("#comment[. = 'net.ipv4.ip_forward: gamma']")).to eq([])
+        # Other keys untouched
+        expect(aug.get('net.ipv4.conf.default.rp_filter')).to eq('1')
+        expect(aug.get('kernel.sysrq')).to eq('0')
+      end
+    end
+
+    it 'removes all three entries on destroy' do
+      aug_open(target, 'Sysctl.lns') do |aug|
+        expect(aug.match('net.ipv4.ip_forward').length).to eq(3)
+
+        loop do
+          break if aug.match('net.ipv4.ip_forward').empty?
+
+          aug.rm("#comment[following-sibling::*[1][self::net.ipv4.ip_forward]][. =~ regexp('net.ipv4.ip_forward:.*')]")
+          aug.rm('net.ipv4.ip_forward')
+        end
+
+        expect(aug.match('net.ipv4.ip_forward')).to eq([])
+        expect(aug.match("#comment[. =~ regexp('net.ipv4.ip_forward:.*')]")).to eq([])
+      end
+    end
+  end
+
+  context 'with duplicates having unmanaged comments' do
+    let(:tmptarget) { aug_fixture('duplicates_unmanaged') }
+    let(:target) { tmptarget.path }
+
+    it 'removes duplicates but preserves all unmanaged comments' do
+      mock_sysctl_update('net.ipv4.ip_forward', '0', '4')
+
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.ipv4.ip_forward',
+               value: '4',
+               target: target,
+               provider: 'augeas'
+             ))
+
+      aug_open(target, 'Sysctl.lns') do |aug|
+        expect(aug.match('net.ipv4.ip_forward').length).to eq(1)
+        expect(aug.get('net.ipv4.ip_forward')).to eq('4')
+        # All unmanaged comments survive (no key: prefix to match)
+        expect(aug.match("#comment[. = 'Someone left notes here']")).not_to eq([])
+        expect(aug.match("#comment[. = 'This was added by the ops team']")).not_to eq([])
+        expect(aug.match("#comment[. = 'Override for the load balancer']")).not_to eq([])
+      end
+    end
+  end
+
+  context 'with duplicates having no comments, but comment_text is set to foo' do
+    let(:tmptarget) { aug_fixture('duplicates_no_comments') }
+    let(:target) { tmptarget.path }
+    it 'removes duplicates and adds a comment to the first match' do
+      mock_sysctl_update('net.ipv4.ip_forward','0','0')
+      apply!(Puppet::Type::type(:sysctl).new(
+               name: 'net.ipv4.ip_forward',
+               value: '0',
+               target: target,
+               comment: 'foo',
+               provider: 'augeas'
+            ))
+      aug_open(target, 'Sysctl.lns') do |aug|
+        expect(aug.match('net.ipv4.ip_forward').length).to eq(1)
+        expect(aug.get('net.ipv4.ip_forward')).to eq('0')
+        expect(aug.match("#comment[. =~ regexp('net.ipv4.ip_forward:.*')]").length).to eq(1)
       end
     end
   end

@@ -1,0 +1,13 @@
+# net.ipv4.ip_forward: first managed comment
+net.ipv4.ip_forward = 0
+
+# Controls source route verification
+net.ipv4.conf.default.rp_filter = 1
+
+# kernel.sysrq: controls the System Request debugging functionality
+kernel.sysrq = 0
+
+kernel.sysrq = 10
+
+# net.ipv4.ip_forward: second managed comment
+net.ipv4.ip_forward = 1

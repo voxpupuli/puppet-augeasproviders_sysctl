@@ -1,0 +1,7 @@
+# net.ipv4.ip_forward: orphaned managed comment with no entry below
+# net.ipv4.ip_forward: another orphaned managed comment
+
+# net.ipv4.ip_forward: real managed comment
+net.ipv4.ip_forward = 0
+net.ipv4.conf.default.rp_filter = 1
+net.ipv4.ip_forward = 1

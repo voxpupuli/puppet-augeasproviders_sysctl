@@ -40,6 +40,19 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
     sysctl('-n', key).chomp
   end
 
+  # Set or remove a managed comment for a sysctl entry. Used by both
+  # cleanup_duplicates and the comment= property setter.
+  def self.set_managed_comment(aug, name, comment_text)
+    cmtnode = "$target/#comment[following-sibling::*[1][self::#{name}]][. =~ regexp('#{name}:.*')]"
+    if comment_text.empty?
+      aug.rm(cmtnode)
+    else
+      aug.insert("$target/#{name}", '#comment', true) if aug.match(cmtnode).empty?
+      aug.set("$target/#comment[following-sibling::*[1][self::#{name}]]",
+              "#{name}: #{comment_text}")
+    end
+  end
+
   confine feature: :augeas
 
   def self.collect_augeas_resources(res, entries, target = '/etc/sysctl.conf', resources)
@@ -194,6 +207,64 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
     end
   end
 
+  # Remove duplicate entries for this resource's key. Returns true if
+  # the entry exists on disk after cleanup (used by flush to decide
+  # whether create is needed).
+  #
+  # Property setters (value=, comment=) run on the shared Augeas
+  # handler BEFORE flush. With duplicates, aug.get returns nil and
+  # aug.set is a no-op, so those changes are silently lost. After
+  # removing duplicates, this method re-applies value and comment
+  # so the tree is correct before augsave! runs.
+  #
+  def cleanup_duplicates
+    exists = false
+
+    augopen! do |aug|
+      entries = aug.match("$target/#{resource[:name]}")
+      exists = !entries.empty?
+      next if entries.length <= 1
+
+      # Build an ordered list of all children so we can find the
+      # specific comment preceding each duplicate entry.
+      all_children = aug.match('$target/*')
+
+      # Remove duplicates in reverse order to preserve path indices
+      # for entries earlier in the list.
+      entries[1..].reverse_each do |entry_path|
+        idx = all_children.index(entry_path)
+        if idx && idx > 0
+          prev = all_children[idx - 1]
+          if prev.include?('#comment')
+            comment_val = aug.get(prev)
+            aug.rm(prev) if comment_val&.match?(%r{^#{resource[:name]}:})
+          end
+        end
+        aug.rm(entry_path)
+      end
+
+      # The earlier comment= setter ran against an ambiguous
+      # `$target/#{name}` path. `aug.insert` failed silently, but the
+      # follow-up `aug.set` on a predicate path with no match still
+      # created a stray managed #comment node at the end of the tree.
+      # Remove it before re-applying so we don't duplicate the comment.
+      trailing = aug.match('$target/*').last
+      if trailing&.include?('#comment') &&
+         aug.get(trailing)&.match?(%r{^#{resource[:name]}:})
+        aug.rm(trailing)
+      end
+
+      # Re-apply value (ambiguous aug.set was a no-op before cleanup)
+      value = resource[:value] || resource[:val]
+      aug.set("$target/#{resource[:name]}", value) if value
+
+      # Re-apply comment (property setter was a no-op due to ambiguity)
+      self.class.set_managed_comment(aug, resource[:name], resource[:comment]) if resource[:comment]
+    end
+
+    exists
+  end
+
   def valid_resource?(name)
     @property_hash.is_a?(Hash) && @property_hash[:name] == name
   end
@@ -223,8 +294,12 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
   end
 
   define_aug_method!(:destroy) do |aug, resource|
-    aug.rm("$target/#comment[following-sibling::*[1][self::#{resource[:name]}]][. =~ regexp('#{resource[:name]}:.*')]")
-    aug.rm('$resource')
+    loop do
+      break if aug.match("$target/#{resource[:name]}").empty?
+
+      aug.rm("$target/#comment[following-sibling::*[1][self::#{resource[:name]}]][. =~ regexp('#{resource[:name]}:.*')]")
+      aug.rm("$target/#{resource[:name]}")
+    end
   end
 
   def live_value
@@ -248,14 +323,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
   end
 
   define_aug_method!(:comment=) do |aug, resource, value|
-    cmtnode = "$target/#comment[following-sibling::*[1][self::#{resource[:name]}]][. =~ regexp('#{resource[:name]}:.*')]"
-    if value.empty?
-      aug.rm(cmtnode)
-    else
-      aug.insert('$resource', '#comment', true) if aug.match(cmtnode).empty?
-      aug.set("$target/#comment[following-sibling::*[1][self::#{resource[:name]}]]",
-              "#{resource[:name]}: #{resource[:comment]}")
-    end
+    set_managed_comment(aug, resource[:name], value)
   end
 
   def flush
@@ -272,8 +340,13 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
 
       # Ensures that we only save to disk when we're supposed to
       if resource[:persist] == :true
-        # Create the entry on disk if it's not already there
-        create if @property_hash[:persist] == :false
+        # Remove duplicates first. With duplicate entries, aug.get returns
+        # nil, so prefetch marks the entry as persist: :false even though
+        # it exists on disk. cleanup_duplicates returns whether the entry
+        # exists after cleanup, avoiding a separate augeas session.
+        on_disk = cleanup_duplicates
+
+        create if @property_hash[:persist] == :false && !on_disk
 
         super
       end

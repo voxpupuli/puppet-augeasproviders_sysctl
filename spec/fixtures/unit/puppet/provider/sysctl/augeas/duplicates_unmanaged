@@ -1,0 +1,9 @@
+# Duplicates with human-written comments that do NOT match the
+# managed comment format (key: text). These must never be removed.
+
+# Someone left notes here
+# This was added by the ops team
+net.ipv4.ip_forward = 0
+
+# Override for the load balancer
+net.ipv4.ip_forward = 1
