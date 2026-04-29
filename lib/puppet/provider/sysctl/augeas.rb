@@ -43,7 +43,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
   # Set or remove a managed comment for a sysctl entry. Used by both
   # cleanup_duplicates and the comment= property setter.
   def self.set_managed_comment(aug, name, comment_text)
-    cmtnode = "$target/#comment[following-sibling::*[1][self::#{name}]][. =~ regexp('#{name}:.*')]"
+    cmtnode = "$target/#comment[following-sibling::*[1][self::#{name}]][. =~ regexp('#{Regexp.escape(name)}:.*')]"
     if comment_text.empty?
       aug.rm(cmtnode)
     else
@@ -237,7 +237,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
           prev = all_children[idx - 1]
           if prev.include?('#comment')
             comment_val = aug.get(prev)
-            aug.rm(prev) if comment_val&.match?(%r{^#{resource[:name]}:})
+            aug.rm(prev) if comment_val&.match?(%r{^#{Regexp.escape(resource[:name])}:})
           end
         end
         aug.rm(entry_path)
@@ -250,7 +250,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
       # Remove it before re-applying so we don't duplicate the comment.
       trailing = aug.match('$target/*').last
       if trailing&.include?('#comment') &&
-         aug.get(trailing)&.match?(%r{^#{resource[:name]}:})
+         aug.get(trailing)&.match?(%r{^#{Regexp.escape(resource[:name])}:})
         aug.rm(trailing)
       end
 
@@ -297,7 +297,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
     loop do
       break if aug.match("$target/#{resource[:name]}").empty?
 
-      aug.rm("$target/#comment[following-sibling::*[1][self::#{resource[:name]}]][. =~ regexp('#{resource[:name]}:.*')]")
+      aug.rm("$target/#comment[following-sibling::*[1][self::#{resource[:name]}]][. =~ regexp('#{Regexp.escape(resource[:name])}:.*')]")
       aug.rm("$target/#{resource[:name]}")
     end
   end

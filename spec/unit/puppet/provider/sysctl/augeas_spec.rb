@@ -752,7 +752,7 @@ describe provider_class do
     let(:target) { tmptarget.path }
     it 'removes duplicates and adds a comment to the first match' do
       mock_sysctl_update('net.ipv4.ip_forward','0','0')
-      apply!(Puppet::Type::type(:sysctl).new(
+      apply!(Puppet::Type.type(:sysctl).new(
                name: 'net.ipv4.ip_forward',
                value: '0',
                target: target,
