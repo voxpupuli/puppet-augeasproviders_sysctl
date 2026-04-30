@@ -62,9 +62,14 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
       entries.each do |entry|
         next if resources.find { |x| x[:name] == entry }
 
-        value = aug.get("$target/#{entry}")
+        # aug.get returns nil when the path is ambiguous (duplicate entries),
+        # so match first and read the first occurrence's value. Without this,
+        # duplicates are silently skipped here and the resource is later
+        # treated as not persisted on disk — which breaks ensure => absent.
+        matches = aug.match("$target/#{entry}")
+        next if matches.empty?
 
-        next unless value
+        value = aug.get(matches.first)
 
         resource = {
           name: entry,

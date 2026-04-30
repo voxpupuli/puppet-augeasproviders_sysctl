@@ -608,24 +608,39 @@ describe provider_class do
 
     # --- positive: destroy removes all occurrences ---
 
-    it 'removes all duplicate entries and managed comments on destroy' do
-      # Cannot use apply! with ensure=>absent due to the prefetch limitation
-      # (see xit test in 'with full file'). Verify the Augeas XPath logic
-      # that the destroy method delegates to.
+    it 'removes all duplicate entries and managed comments on destroy via apply!' do
+      mock_sysctl_noop('kernel.sysrq', '0')
+
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'kernel.sysrq',
+               ensure: 'absent',
+               target: target,
+               provider: 'augeas'
+             ))
+
       aug_open(target, 'Sysctl.lns') do |aug|
-        expect(aug.match('kernel.sysrq').length).to eq(2)
-
-        loop do
-          break if aug.match('kernel.sysrq').empty?
-
-          aug.rm("#comment[following-sibling::*[1][self::kernel.sysrq]][. =~ regexp('kernel.sysrq:.*')]")
-          aug.rm('kernel.sysrq')
-        end
-
         expect(aug.match('kernel.sysrq')).to eq([])
         expect(aug.match("#comment[. =~ regexp('kernel.sysrq:.*')]")).to eq([])
         # Other keys survive
         expect(aug.match('net.ipv4.ip_forward').length).to eq(2)
+      end
+    end
+
+    it 'removes all duplicate entries and BOTH managed comments on destroy via apply!' do
+      mock_sysctl_noop('net.ipv4.ip_forward', '0')
+
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.ipv4.ip_forward',
+               ensure: 'absent',
+               target: target,
+               provider: 'augeas'
+             ))
+
+      aug_open(target, 'Sysctl.lns') do |aug|
+        expect(aug.match('net.ipv4.ip_forward')).to eq([])
+        expect(aug.match("#comment[. =~ regexp('net.ipv4.ip_forward:.*')]")).to eq([])
+        # Other keys survive
+        expect(aug.match('kernel.sysrq').length).to eq(2)
       end
     end
 
@@ -705,17 +720,17 @@ describe provider_class do
       end
     end
 
-    it 'removes all three entries on destroy' do
+    it 'removes all three entries on destroy via apply!' do
+      mock_sysctl_noop('net.ipv4.ip_forward', '0')
+
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.ipv4.ip_forward',
+               ensure: 'absent',
+               target: target,
+               provider: 'augeas'
+             ))
+
       aug_open(target, 'Sysctl.lns') do |aug|
-        expect(aug.match('net.ipv4.ip_forward').length).to eq(3)
-
-        loop do
-          break if aug.match('net.ipv4.ip_forward').empty?
-
-          aug.rm("#comment[following-sibling::*[1][self::net.ipv4.ip_forward]][. =~ regexp('net.ipv4.ip_forward:.*')]")
-          aug.rm('net.ipv4.ip_forward')
-        end
-
         expect(aug.match('net.ipv4.ip_forward')).to eq([])
         expect(aug.match("#comment[. =~ regexp('net.ipv4.ip_forward:.*')]")).to eq([])
       end
