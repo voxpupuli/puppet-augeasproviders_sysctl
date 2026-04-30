@@ -620,7 +620,7 @@ describe provider_class do
 
       aug_open(target, 'Sysctl.lns') do |aug|
         expect(aug.match('kernel.sysrq')).to eq([])
-        expect(aug.match("#comment[. =~ regexp('kernel.sysrq:.*')]")).to eq([])
+        expect(aug.match("#comment[. =~ regexp('kernel\\.sysrq:.*')]")).to eq([])
         # Other keys survive
         expect(aug.match('net.ipv4.ip_forward').length).to eq(2)
       end
@@ -638,7 +638,7 @@ describe provider_class do
 
       aug_open(target, 'Sysctl.lns') do |aug|
         expect(aug.match('net.ipv4.ip_forward')).to eq([])
-        expect(aug.match("#comment[. =~ regexp('net.ipv4.ip_forward:.*')]")).to eq([])
+        expect(aug.match("#comment[. =~ regexp('net\\.ipv4\\.ip_forward:.*')]")).to eq([])
         # Other keys survive
         expect(aug.match('kernel.sysrq').length).to eq(2)
       end
@@ -732,7 +732,7 @@ describe provider_class do
 
       aug_open(target, 'Sysctl.lns') do |aug|
         expect(aug.match('net.ipv4.ip_forward')).to eq([])
-        expect(aug.match("#comment[. =~ regexp('net.ipv4.ip_forward:.*')]")).to eq([])
+        expect(aug.match("#comment[. =~ regexp('net\\.ipv4\\.ip_forward:.*')]")).to eq([])
       end
     end
   end
