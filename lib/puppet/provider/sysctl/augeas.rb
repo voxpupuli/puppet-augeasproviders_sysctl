@@ -9,7 +9,8 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
   desc 'Uses Augeas API to update sysctl settings'
 
   default_file do
-    if Facter.value(:os)['name'] == 'Debian' && Facter.value(:os)['release']['major'].to_i >= 13
+    if (Facter.value(:os)['name'] == 'Debian' && Facter.value(:os)['release']['major'].to_i >= 13) ||
+       (Facter.value(:os)['name'] == 'Ubuntu' && Facter.value(:os)['release']['major'].split('.').map(&:to_i) >= [26, 4])
       '/etc/sysctl.d/99-puppet.conf'
     else
       '/etc/sysctl.conf'
