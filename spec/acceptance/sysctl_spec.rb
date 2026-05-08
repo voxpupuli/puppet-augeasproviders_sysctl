@@ -261,6 +261,96 @@ describe 'Sysctl Tests' do
             end
           end
         end
+
+        context 'with no value' do
+          let(:manifest) do
+            "sysctl { 'vm.swappiness': }"
+          end
+
+          it 'works with no errors' do
+            apply_manifest_on(host, manifest, catch_failures: true)
+          end
+
+          it 'is idempotent' do
+            apply_manifest_on(host, manifest, catch_changes: true)
+          end
+        end
+
+        context 'when setting multiple values' do
+          let(:manifest) do
+            <<-EOS
+              sysctl { 'vm.swappiness': value => '60' }
+              sysctl { 'net.ipv4.ip_forward': value => '0' }
+            EOS
+          end
+
+          it 'works with no errors' do
+            apply_manifest_on(host, manifest, catch_failures: true)
+          end
+
+          it 'is idempotent' do
+            apply_manifest_on(host, manifest, catch_changes: true)
+          end
+        end
+
+        context 'when removing multiple values' do
+          let(:manifest_one) do
+            <<-EOS
+              sysctl { 'vm.swappiness': value => '60' }
+              sysctl { 'net.ipv4.ip_forward': value => '0' }
+            EOS
+          end
+          let(:manifest_two) do
+            <<-EOS
+              sysctl { 'vm.swappiness': ensure => 'absent' }
+              sysctl { 'net.ipv4.ip_forward': ensure => 'absent' }
+            EOS
+          end
+
+          it 'is idempotent' do
+            apply_manifest_on(host, manifest_one, catch_failures: true)
+            apply_manifest_on(host, manifest_two, catch_failures: true)
+            apply_manifest_on(host, manifest_two, catch_changes: true)
+          end
+        end
+
+        context 'when managing multiple files' do
+          let(:manifest) do
+            <<-EOS
+              sysctl{'net.ipv6.conf.all.disable_ipv6': ensure => present, value => 1, target => '/etc/sysctl.d/99-disable-ipv6.conf' }
+              sysctl{'net.ipv4.tcp_syncookies':         ensure => present, value => 2, target => '/etc/sysctl.d/99-ddos-abwehr.conf'}
+            EOS
+          end
+
+          it 'works with no errors' do
+            apply_manifest_on(host, manifest, catch_failures: true)
+          end
+
+          it 'is idempotent' do
+            apply_manifest_on(host, manifest, catch_changes: true)
+          end
+
+          describe 'removing one of two settings' do
+            let(:manifest_one) do
+              <<-EOS
+                sysctl{'net.ipv6.conf.all.disable_ipv6': ensure => present, value => 1, target => '/etc/sysctl.d/99-disable-ipv6.conf' }
+                sysctl{'net.ipv4.tcp_syncookies':         ensure => present, value => 2, target => '/etc/sysctl.d/99-ddos-abwehr.conf'}
+              EOS
+            end
+            let(:manifest_two) do
+              <<-EOS
+                sysctl{'net.ipv6.conf.all.disable_ipv6': ensure => present, value => 1, target => '/etc/sysctl.d/99-disable-ipv6.conf' }
+                sysctl{'net.ipv4.tcp_syncookies':         ensure => absent, target => '/etc/sysctl.d/99-ddos-abwehr.conf'}
+              EOS
+            end
+
+            it 'is idempotent' do
+              apply_manifest_on(host, manifest_one, catch_failures: true)
+              apply_manifest_on(host, manifest_two, catch_failures: true)
+              apply_manifest_on(host, manifest_two, catch_changes: true)
+            end
+          end
+        end
       end
     end
   end
