@@ -278,7 +278,7 @@ describe provider_class do
     context 'when only system value is set to target value' do
       it 'updates value with augeas only' do
         expect(provider_class).to receive(:sysctl).with(['-e', 'net.ipv4.ip_forward']).and_return('net.ipv4.ip_forward=1')
-        expect(provider_class).to receive(:sysctl).with('-n', 'net.ipv4.ip_forward').twice.and_return('1')
+        expect(provider_class).to receive(:sysctl).with('-n', 'net.ipv4.ip_forward').exactly(3).times.and_return('1')
         # Values not in sync, system update forced anyway
         expect(provider_class).to receive(:sysctl).with('-w', 'net.ipv4.ip_forward=1').once.and_return('1')
         expect(provider_class).to receive(:sysctl).with(['-e', 'net.ipv4.ip_forward']).and_return('net.ipv4.ip_forward=1')
@@ -325,7 +325,7 @@ describe provider_class do
     context 'when only config value is set to target value' do
       it 'updates value with sysctl only' do
         expect(provider_class).to receive(:sysctl).with(['-e', 'net.ipv4.ip_forward']).and_return('net.ipv4.ip_forward=1')
-        expect(provider_class).to receive(:sysctl).with('-n', 'net.ipv4.ip_forward').twice.and_return('1', '0')
+        expect(provider_class).to receive(:sysctl).with('-n', 'net.ipv4.ip_forward').exactly(3).times.and_return('1', '0')
         # Values not in sync, system update forced anyway
         expect(provider_class).to receive(:sysctl).with('-w', 'net.ipv4.ip_forward=0').once.and_return('0')
         expect(provider_class).to receive(:sysctl).with(['-e', 'net.ipv4.ip_forward']).and_return('net.ipv4.ip_forward=0')
@@ -368,6 +368,40 @@ describe provider_class do
       end
     end
 
+    context 'when the kernel does not take the live value' do
+      it 'fails' do
+        expect(provider_class).to receive(:sysctl).with(['-e', 'net.ipv4.ip_forward']).and_return('net.ipv4.ip_forward=0')
+        expect(provider_class).to receive(:sysctl).with('-n', 'net.ipv4.ip_forward').twice.and_return('0')
+        expect(provider_class).to receive(:sysctl).with('-w', 'net.ipv4.ip_forward=5')
+
+        txn = apply(Puppet::Type.type(:sysctl).new(
+                      name: 'net.ipv4.ip_forward',
+                      value: '5',
+                      target: target,
+                      provider: 'augeas'
+                    ))
+
+        expect(txn.any_failed?).not_to be_nil
+        expect(@logs.map(&:message)).to include("Could not evaluate: Failed to set live value of `net.ipv4.ip_forward` to '5', got '0'")
+      end
+
+      it 'does not fail in silent mode' do
+        expect(provider_class).to receive(:sysctl).with(['-e', 'net.ipv4.ip_forward']).and_return('net.ipv4.ip_forward=0')
+        expect(provider_class).not_to receive(:sysctl).with('-n', 'net.ipv4.ip_forward')
+        expect(provider_class).to receive(:sysctl).with('-w', 'net.ipv4.ip_forward=5')
+
+        txn = apply(Puppet::Type.type(:sysctl).new(
+                      name: 'net.ipv4.ip_forward',
+                      value: '5',
+                      silent: true,
+                      target: target,
+                      provider: 'augeas'
+                    ))
+
+        expect(txn.any_failed?).to be_nil
+      end
+    end
+
     context 'when updating comment' do
       it 'changes comment' do
         expect(provider_class).to receive(:sysctl).with(['-e', 'kernel.sysrq']).twice.and_return('kernel.sysrq=enables the SysRq feature')
@@ -405,7 +439,7 @@ describe provider_class do
     context 'when not persisting' do
       it 'does not persist the value on disk' do
         expect(provider_class).to receive(:sysctl).with(['-e', 'net.ipv4.ip_forward']).and_return('net.ipv4.ip_forward=0')
-        expect(provider_class).to receive(:sysctl).with('-n', 'net.ipv4.ip_forward').twice.and_return('0', '1')
+        expect(provider_class).to receive(:sysctl).with('-n', 'net.ipv4.ip_forward').exactly(3).times.and_return('0', '1')
         expect(provider_class).to receive(:sysctl).with('-w', 'net.ipv4.ip_forward=1').once
         expect(provider_class).to receive(:sysctl).with(['-e', 'net.ipv4.ip_forward']).and_return('net.ipv4.ip_forward=1')
 
