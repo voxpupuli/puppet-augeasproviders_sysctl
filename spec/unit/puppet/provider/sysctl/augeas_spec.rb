@@ -104,6 +104,48 @@ describe provider_class do
     end
   end
 
+  context 'when persisting a key missing from the live system' do
+    let(:tmptarget) { aug_fixture('empty') }
+    let(:target) { tmptarget.path }
+
+    before do
+      expect(provider_class).to receive(:sysctl).with(['-e', 'net.future.key']).twice.and_return('')
+      expect(provider_class).not_to receive(:sysctl).with('-n', 'net.future.key')
+      expect(provider_class).not_to receive(:sysctl).with('-w', 'net.future.key=1')
+    end
+
+    it 'creates the entry without applying it' do
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.future.key',
+               ensure: 'present',
+               value: '1',
+               comment: 'test',
+               apply: false,
+               target: target,
+               provider: 'augeas'
+             ))
+
+      augparse(target, 'Sysctl.lns', '
+        { "#comment" = "net.future.key: test" }
+        { "net.future.key" = "1" }
+      ')
+    end
+
+    it 'creates the entry without ensure' do
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.future.key',
+               value: '1',
+               apply: false,
+               target: target,
+               provider: 'augeas'
+             ))
+
+      augparse(target, 'Sysctl.lns', '
+        { "net.future.key" = "1" }
+      ')
+    end
+  end
+
   context 'with full file' do
     let(:tmptarget) { aug_fixture('full') }
     let(:target) { tmptarget.path }
