@@ -102,6 +102,20 @@ describe provider_class do
         { "net.ipv4.ip_forward" = "1" }
       ')
     end
+
+    it 'creates new entry with UTF-8 comment idempotently' do
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.ipv4.ip_forward',
+               value: '1',
+               comment: 'Für Podman DNS',
+               target: target,
+               provider: 'augeas'
+             ))
+
+      aug_open(target, 'Sysctl.lns') do |aug|
+        expect(aug.get('#comment').force_encoding(Encoding::UTF_8)).to eq('net.ipv4.ip_forward: Für Podman DNS')
+      end
+    end
   end
 
   context 'with full file' do
