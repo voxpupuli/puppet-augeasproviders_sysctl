@@ -160,6 +160,44 @@ describe provider_class do
     end
   end
 
+  context 'when the key is missing at prefetch' do
+    let(:tmptarget) { aug_fixture('empty') }
+    let(:target) { tmptarget.path }
+
+    it 'accepts a key that appeared on the live system' do
+      expect(provider_class).to receive(:sysctl).with(['-e', 'net.bridge.bridge-nf-call-iptables']).twice.and_return('', 'net.bridge.bridge-nf-call-iptables = 1')
+      expect(provider_class).to receive(:sysctl).with('-n', 'net.bridge.bridge-nf-call-iptables').at_least(:once).and_return('0', '0', '1')
+      expect(provider_class).to receive(:sysctl).with('-w', 'net.bridge.bridge-nf-call-iptables=1')
+
+      apply!(Puppet::Type.type(:sysctl).new(
+               name: 'net.bridge.bridge-nf-call-iptables',
+               value: '1',
+               target: target,
+               provider: 'augeas'
+             ))
+
+      augparse(target, 'Sysctl.lns', '
+        { "net.bridge.bridge-nf-call-iptables" = "1" }
+      ')
+    end
+
+    it 'rejects a key missing from the live system' do
+      expect(provider_class).to receive(:sysctl).with(['-e', 'net.bogus']).and_return('')
+      expect(provider_class).to receive(:sysctl).with('-n', 'net.bogus').once.and_raise(Puppet::ExecutionFailure, 'unknown key')
+      expect(provider_class).not_to receive(:sysctl).with('-w', 'net.bogus=1')
+
+      txn = apply(Puppet::Type.type(:sysctl).new(
+                    name: 'net.bogus',
+                    value: '1',
+                    target: target,
+                    provider: 'augeas'
+                  ))
+
+      expect(txn.any_failed?).not_to be_nil
+      expect(@logs.map(&:message)).to include('Could not evaluate: Error: `net.bogus` is not a valid sysctl key')
+    end
+  end
+
   context 'with full file' do
     let(:tmptarget) { aug_fixture('full') }
     let(:target) { tmptarget.path }
