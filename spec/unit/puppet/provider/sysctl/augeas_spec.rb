@@ -605,6 +605,35 @@ describe provider_class do
     end
   end
 
+  context 'with multiple target files' do
+    let(:small_target) { aug_fixture('small') }
+    let(:full_target) { aug_fixture('full') }
+
+    it 'deletes entries from their own target' do
+      expect(provider_class).to receive(:sysctl).with(['-e', 'net.ipv4.ip_forward', 'kernel.sysrq']).twice.and_return("net.ipv4.ip_forward=0\nkernel.sysrq=0")
+      expect(provider_class).to receive(:sysctl).with('-n', 'net.ipv4.ip_forward').at_least(:once).and_return('0')
+
+      apply!(
+        Puppet::Type.type(:sysctl).new(
+          name: 'net.ipv4.ip_forward',
+          value: '0',
+          target: small_target.path,
+          provider: 'augeas'
+        ),
+        Puppet::Type.type(:sysctl).new(
+          name: 'kernel.sysrq',
+          ensure: 'absent',
+          target: full_target.path,
+          provider: 'augeas'
+        )
+      )
+
+      aug_open(full_target.path, 'Sysctl.lns') do |aug|
+        expect(aug.match('kernel.sysrq')).to eq([])
+      end
+    end
+  end
+
   # Helper: set up sysctl command mocks for an update operation.
   # Mocks -e (prefetch, twice), -n (live value check), -w (set value).
   def mock_sysctl_update(key, current_value, new_value)

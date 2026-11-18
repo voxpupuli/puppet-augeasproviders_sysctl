@@ -61,7 +61,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
 
   confine feature: :augeas
 
-  def self.collect_augeas_resources(res, entries, target = '/etc/sysctl.conf', resources)
+  def self.collect_augeas_resources(res, entries, target, resources)
     resources ||= []
 
     augopen(res) do |aug|
@@ -106,14 +106,12 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
 
     if reference_resources
       reference_resource_titles = reference_resources.map { |_ref_name, ref_obj| ref_obj.title }
-      resource_dup = reference_resources.first.last.dup
 
-      collect_augeas_resources(
-        resource_dup,
-        reference_resource_titles,
-        resource_dup[:target],
-        resources
-      )
+      reference_resources.values.group_by { |ref_obj| target(ref_obj) }.each do |tgt, refs|
+        tmp_res = Puppet::Resource.new('sysctl', 'ignored')
+        tmp_res[:target] = tgt
+        collect_augeas_resources(tmp_res, refs.map(&:title), tgt, resources)
+      end
 
       sysctl_args = if Facter.value(:kernel) == 'OpenBSD'
                       # OpenBSD doesn't support -e
