@@ -264,6 +264,64 @@ describe 'Sysctl Tests' do
             end
           end
         end
+
+        context 'when using multiple target files' do
+          let(:manifest) do
+            <<-EOM
+              sysctl { 'net.ipv4.ip_forward':
+                value  => '1',
+                target => '/etc/sysctl.d/30-a.conf'
+              }
+
+              sysctl { 'net.ipv4.tcp_syncookies':
+                value  => '2',
+                target => '/etc/sysctl.d/30-b.conf'
+              }
+            EOM
+          end
+
+          it 'works with no errors' do
+            apply_manifest_on(host, manifest, catch_failures: true)
+          end
+
+          it 'is idempotent' do
+            apply_manifest_on(host, manifest, { catch_changes: true })
+          end
+
+          it 'has correct file contents' do
+            expect(file_contents_on(host, '/etc/sysctl.d/30-a.conf')).to match(%r{net\.ipv4\.ip_forward = 1})
+            expect(file_contents_on(host, '/etc/sysctl.d/30-b.conf')).to match(%r{net\.ipv4\.tcp_syncookies = 2})
+          end
+
+          context 'when deleting an entry from the second file' do
+            let(:manifest) do
+              <<-EOM
+                sysctl { 'net.ipv4.ip_forward':
+                  value  => '1',
+                  target => '/etc/sysctl.d/30-a.conf'
+                }
+
+                sysctl { 'net.ipv4.tcp_syncookies':
+                  ensure => absent,
+                  target => '/etc/sysctl.d/30-b.conf'
+                }
+              EOM
+            end
+
+            it 'works with no errors' do
+              apply_manifest_on(host, manifest, catch_failures: true)
+            end
+
+            it 'is idempotent' do
+              apply_manifest_on(host, manifest, { catch_changes: true })
+            end
+
+            it 'has been removed from the system' do
+              expect(file_contents_on(host, '/etc/sysctl.d/30-a.conf')).to match(%r{net\.ipv4\.ip_forward = 1})
+              expect(file_contents_on(host, '/etc/sysctl.d/30-b.conf')).not_to match(%r{net\.ipv4\.tcp_syncookies})
+            end
+          end
+        end
       end
     end
   end
