@@ -280,8 +280,16 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
   def valid_resource?(name)
     # The key only needs to exist on the live system when applying it
     return true if resource && resource[:apply] == :false
+    return true if @property_hash.is_a?(Hash) && @property_hash[:name] == name
+    return false if @live_checked
 
-    @property_hash.is_a?(Hash) && @property_hash[:name] == name
+    # The key may have appeared after prefetch, e.g. from loading a module
+    @live_checked = true
+    value = self.class.sysctl_get(name)
+    @property_hash = { name: name, ensure: :present, value: value, apply: :true, persist: :false }
+    true
+  rescue Puppet::ExecutionFailure
+    false
   end
 
   def exists?
