@@ -24,14 +24,16 @@ know anything about Augeas to make use of it.
 ## Requirements
 
 Ensure both Augeas and ruby-augeas 0.3.0+ bindings are installed and working as
-normal.
+normal. Both are bundled with the OpenVox agent package.
+See also [Augeas](https://augeas.net/) and
+[ruby-augeas](https://github.com/hercules-team/ruby-augeas).
 
-See [Puppet/Augeas pre-requisites](http://docs.puppetlabs.com/guides/augeas.html#pre-requisites).
+The [augeasproviders_core](https://github.com/voxpupuli/puppet-augeasproviders_core)
+module is also required.
 
 ## Documentation and examples
 
-Type documentation can be generated with `puppet doc -r type` or viewed on the
-[Puppet Forge page](http://forge.puppetlabs.com/puppet/augeasproviders_sysctl).
+Type documentation is available in [REFERENCE.md](REFERENCE.md).
 
 By default, `sysctl` settings are both applied to the running kernel configuration (via `sysctl -w`) and persisted to disk. See the `apply` and `persist` parameters to change this behavior.
 
