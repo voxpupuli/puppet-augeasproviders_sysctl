@@ -214,6 +214,7 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
       commented = aug.match("$target/#comment[.=~regexp('#{resource[:name]}([^a-z.].*)?')]")
       aug.insert(commented.first, resource[:name], false) unless commented.empty?
       aug.set(resource_path, value)
+      self.class.set_managed_comment(aug, resource[:name], resource[:comment]) if resource[:comment]
       setvars(aug)
     end
   end
@@ -277,6 +278,9 @@ Puppet::Type.type(:sysctl).provide(:augeas, parent: Puppet::Type.type(:augeaspro
   end
 
   def valid_resource?(name)
+    # The key only needs to exist on the live system when applying it
+    return true if resource && resource[:apply] == :false
+
     @property_hash.is_a?(Hash) && @property_hash[:name] == name
   end
 
